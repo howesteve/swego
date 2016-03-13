@@ -4,19 +4,19 @@ package swego
 // CalcFlags represents the flags argument of swe_calc and swe_calc_ut in a
 // stateless way.
 type CalcFlags struct {
-	Flags int32
+	Flags   int32
+	TopoLoc TopoLoc
+	SidMode SidMode
 
 	// FileNameJPL represents the argument to swe_set_jpl_file.
 	FileNameJPL string
+}
 
-	// TopoLoc represents the arguments to swe_set_topo.
-	TopoLoc struct {
-		Lat  float64
-		Long float64
-		Alt  float64
-	}
-
-	SidMode SidMode
+// TopoLoc represents the arguments to swe_set_topo.
+type TopoLoc struct {
+	Lat  float64
+	Long float64
+	Alt  float64
 }
 
 // AyanamsaExFlags represents the flags argument of swe_get_ayanamsa_ex and
