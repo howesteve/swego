@@ -124,6 +124,12 @@ func setSidMode(mode int32, t0, ayanT0 float64) {
 	C.swex_set_sid_mode(_mode, _t0, _ayanT0)
 }
 
+func setFileNameJPL(name string) {
+	_name := C.CString(name)
+	C.swe_set_jpl_file(_name)
+	C.free(unsafe.Pointer(_name))
+}
+
 func close() {
 	C.swe_close()
 }

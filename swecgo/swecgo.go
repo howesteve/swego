@@ -63,6 +63,10 @@ func setFlagState(fl swego.CalcFlags) {
 	if (fl.Flags & flgSidereal) == flgSidereal {
 		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	}
+
+	if fl.FileNameJPL != "" {
+		setFileNameJPL(fl.FileNameJPL)
+	}
 }
 
 // PlanetName implements swego.Interface.
