@@ -95,7 +95,7 @@ type Interface interface {
 	// UTCToJD returns the corresponding Julian Date in Ephemeris and Universal
 	// Time for the given date and accounts for leap seconds in the conversion.
 	// Calendar type ct is used to clearify the year y, Julian or Gregorian.
-	UTCToJD(y, m, d int, h float64, ct CalType) (et, ut float64, err error)
+	UTCToJD(y, m, d, h, i int, s float64, ct CalType) (et, ut float64, err error)
 	// JdETToUTC returns the corresponding calendar date for the given Julian
 	// Date in Ephemeris Time and accounts for leap seconds in the conversion.
 	// Calendar type ct is used to clearify the year y, Julian or Gregorian.
