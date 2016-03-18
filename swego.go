@@ -54,6 +54,9 @@ const (
 type Interface interface {
 	Version() string
 
+	SetPath(ephepath string)
+	Close()
+
 	Calc(et float64, pl int, fl CalcFlags) (xx [6]float64, cfl int, err error)
 	CalcUT(ut float64, pl int, fl CalcFlags) (xx [6]float64, cfl int, err error)
 
