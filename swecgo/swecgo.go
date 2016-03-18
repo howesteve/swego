@@ -68,14 +68,14 @@ func (w *wrapper) execute(fn func(swego.Interface)) {
 	wg.Wait()
 }
 
-// SetPath sets the ephemeris data path.
+// Version implements swego.Interface.
+func (w *wrapper) Version() string { return Version }
+
+// SetPath implements swego.Interface.
 func (w *wrapper) SetPath(ephepath string) { setEphePath(ephepath) }
 
-// Close closes the Swiss Ephemeris library.
+// Close implements swego.Interface.
 func (w *wrapper) Close() { close() }
-
-// Version returns the version of the Swiss Ephemeris.
-func (w *wrapper) Version() string { return Version }
 
 func setCalcFlagsState(fl swego.CalcFlags) {
 	if (fl.Flags & flgTopo) == flgTopo {
@@ -91,28 +91,25 @@ func setCalcFlagsState(fl swego.CalcFlags) {
 	}
 }
 
-// Calc calculates the position and optionally the speed of planet pl at Julian
-// Date (in Ephemeris Time) et with calculation flags fl.
+// Calc implements swego.Interface.
 func (w *wrapper) Calc(et float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calc(et, pl, fl.Flags)
 }
 
-// CalcUT calculates the position and optionally the speed of planet pl at
-// Julian Date (in Universal Time) ut with calculation flags fl. Within the C
-// library swe_deltat is called to convert Universal Time to Ephemeris Time.
+// CalcUT implements swego.Interface.
 func (w *wrapper) CalcUT(ut float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calcUT(ut, pl, fl.Flags)
 }
 
-// PlanetName returns the name of planet pl.
+// PlanetName implements swego.Interface.
 func (w *wrapper) PlanetName(pl int) string { return planetName(pl) }
 
-// GetAyanamsa returns the ayanamsa for Julian Date (in Ephemeris Time) et.
+// GetAyanamsa implements swego.Interface.
 func (w *wrapper) GetAyanamsa(et float64) float64 { return getAyanamsa(et) }
 
-// GetAyanamsaUT returns the ayanamsa for Julian Date (in Universal Time) ut.
+// GetAyanamsaUT implements swego.Interface.
 func (w *wrapper) GetAyanamsaUT(ut float64) float64 { return getAyanamsaUT(ut) }
 
 func setAyanamsaExFlagsState(fl swego.AyanamsaExFlags) {
@@ -121,91 +118,102 @@ func setAyanamsaExFlagsState(fl swego.AyanamsaExFlags) {
 	}
 }
 
-// GetAyanamsaEx returns the ayanamsa for Julian Date (in Ephemeris Time) et.
-// It is equal to GetAyanamsa but uses the ΔT consistent with the ephemeris
-// passed in fl.Flags.
+// GetAyanamsaEx implements swego.Interface.
 func (w *wrapper) GetAyanamsaEx(et float64, fl swego.AyanamsaExFlags) (float64, error) {
 	setAyanamsaExFlagsState(fl)
 	return getAyanamsaEx(et, fl.Flags)
 }
 
-// GetAyanamsaExUT returns the ayanamsa for Julian Date (in Universal Time) ut.
-// It is equal to GetAyanamsaUT but uses the ΔT consistent with the ephemeris
-// passed in fl.Flags.
+// GetAyanamsaExUT implements swego.Interface.
 func (w *wrapper) GetAyanamsaExUT(ut float64, fl swego.AyanamsaExFlags) (float64, error) {
 	setAyanamsaExFlagsState(fl)
 	return getAyanamsaExUT(ut, fl.Flags)
 }
 
-// GetAyanamsaName returns the name of sidmode.
+// GetAyanamsaName implements swego.Interface.
 func (w *wrapper) GetAyanamsaName(sidmode int32) string {
 	return getAyanamsaName(sidmode)
 }
 
+// JulDay implements swego.Interface.
 func (w *wrapper) JulDay(y, m, d int, h float64, ct swego.CalType) float64 {
 	panic("not implemented")
 }
 
-func (w *wrapper) RevJul(jd float64, c byte) (y, m, d int, h float64) {
+// RevJul implements swego.Interface.
+func (w *wrapper) RevJul(jd float64, ct swego.CalType) (y, m, d int, h float64) {
 	panic("not implemented")
 }
 
-func (w *wrapper) UTCToJD(y, m, d int, h float64, ct swego.CalType) float64 {
+// UTCToJD implements swego.Interface.
+func (w *wrapper) UTCToJD(y, m, d int, h float64, ct swego.CalType) (et, ut float64, err error) {
 	panic("not implemented")
 }
 
-func (w *wrapper) JdETToUTC(et float64, c byte) (y, m, d, h, i int, s float64) {
+// JdETToUTC implements swego.Interface.
+func (w *wrapper) JdETToUTC(et float64, ct swego.CalType) (y, m, d, h, i int, s float64) {
 	panic("not implemented")
 }
 
-func (w *wrapper) JdUT1ToUTC(ut1 float64, c byte) (y, m, d, h, i int, s float64) {
+// JdUT1ToUTC implements swego.Interface.
+func (w *wrapper) JdUT1ToUTC(ut1 float64, ct swego.CalType) (y, m, d, h, i int, s float64) {
 	panic("not implemented")
 }
 
+// Houses implements swego.Interface.
 func (w *wrapper) Houses(ut, geolat, geolon float64, hsys int) ([]float64, [10]float64) {
 	panic("not implemented")
 }
 
+// HousesEx implements swego.Interface.
 func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys int) ([]float64, [10]float64) {
 	panic("not implemented")
 }
 
+// HousesArmc implements swego.Interface.
 func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys int) ([]float64, [10]float64) {
 	panic("not implemented")
 }
 
+// HousePos implements swego.Interface.
 func (w *wrapper) HousePos(armc, geolat, eps float64, hsys int, xpin [2]float64) (float64, error) {
 	panic("not implemented")
 }
 
+// HouseName implements swego.Interface.
 func (w *wrapper) HouseName(hsys int) string {
 	panic("not implemented")
 }
 
-func (w *wrapper) TimeEqu(jd float64) (float64, error) {
-	panic("not implemented")
-}
-
-func (w *wrapper) LMTToLAT(jdLMT, geolon float64) (float64, error) {
-	panic("not implemented")
-}
-
-func (w *wrapper) LATToLMT(jdLAT, geolon float64) (float64, error) {
-	panic("not implemented")
-}
-
-// DeltaT returns the ΔT for the Julian Date jd.
+// DeltaT implements swego.Interface.
 func (w *wrapper) DeltaT(jd float64) float64 { return deltaT(jd) }
 
-// DeltaTEx returns the ΔT for the Julian Date jd.
+// DeltaTEx implements swego.Interface.
 func (w *wrapper) DeltaTEx(jd float64, fl int32) (float64, error) {
 	return deltaTEx(jd, fl)
 }
 
+// TimeEqu implements swego.Interface.
+func (w *wrapper) TimeEqu(jd float64) (float64, error) {
+	panic("not implemented")
+}
+
+// LMTToLAT implements swego.Interface.
+func (w *wrapper) LMTToLAT(jdLMT, geolon float64) (float64, error) {
+	panic("not implemented")
+}
+
+// LATToLMT implements swego.Interface.
+func (w *wrapper) LATToLMT(jdLAT, geolon float64) (float64, error) {
+	panic("not implemented")
+}
+
+// SidTime0 implements swego.Interface.
 func (w *wrapper) SidTime0(ut, eps, nut float64) float64 {
 	panic("not implemented")
 }
 
+// SidTime implements swego.Interface.
 func (w *wrapper) SidTime(ut float64) float64 {
 	panic("not implemented")
 }
