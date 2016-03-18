@@ -229,6 +229,43 @@ func deltaTEx(jd float64, eph int32) (float64, error) {
 	return deltaT, err
 }
 
+func timeEqu(jd float64) (E float64, err error) {
+	_E := (*C.double)(unsafe.Pointer(&E))
+
+	err = withError(func(err *C.char) bool {
+		rc := int(C.swe_time_equ(C.double(jd), _E, err))
+		return rc == C.ERR
+	})
+
+	return
+}
+
+func lmtToLAT(jdLMT, geolon float64) (jdLAT float64, err error) {
+	_lmt := C.double(jdLMT)
+	_geolon := C.double(geolon)
+	_lat := (*C.double)(unsafe.Pointer(&jdLAT))
+
+	err = withError(func(err *C.char) bool {
+		rc := int(C.swe_lmt_to_lat(_lmt, _geolon, _lat, err))
+		return rc == C.ERR
+	})
+
+	return
+}
+
+func latToLMT(jdLAT, geolon float64) (jdLMT float64, err error) {
+	_lat := C.double(jdLAT)
+	_geolon := C.double(geolon)
+	_lmt := (*C.double)(unsafe.Pointer(&jdLMT))
+
+	err = withError(func(err *C.char) bool {
+		rc := int(C.swe_lat_to_lmt(_lat, _geolon, _lmt, err))
+		return rc == C.ERR
+	})
+
+	return
+}
+
 func sidTime0(ut, eps, nut float64) float64 {
 	_ut := C.double(ut)
 	_eps := C.double(eps)

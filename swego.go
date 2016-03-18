@@ -132,8 +132,14 @@ type Interface interface {
 	// DeltaTEx returns the ΔT for the Julian Date jd.
 	DeltaTEx(jd float64, fl int32) (float64, error)
 
+	// TimeEqu returns the difference between local apparent and local mean time
+	// in days for the given Julian Date (in Universal Time).
 	TimeEqu(jd float64) (float64, error)
+	// LMTToLAT returns the local apparent time for the given Julian Date (in
+	// Local Mean Time) and the geographic longitude.
 	LMTToLAT(jdLMT, geolon float64) (float64, error)
+	// LATToLMT returns the local mean time for the given Julian Date (in Local
+	// Apparent Time) and the geographic longitude.
 	LATToLMT(jdLAT, geolon float64) (float64, error)
 
 	// SidTime0 returns the sidereal time for Julian Date jd, ecliptic obliquity

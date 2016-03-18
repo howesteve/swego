@@ -192,18 +192,16 @@ func (w *wrapper) DeltaTEx(jd float64, fl int32) (float64, error) {
 }
 
 // TimeEqu implements swego.Interface.
-func (w *wrapper) TimeEqu(jd float64) (float64, error) {
-	panic("not implemented")
-}
+func (w *wrapper) TimeEqu(jd float64) (float64, error) { return timeEqu(jd) }
 
 // LMTToLAT implements swego.Interface.
 func (w *wrapper) LMTToLAT(jdLMT, geolon float64) (float64, error) {
-	panic("not implemented")
+	return lmtToLAT(jdLMT, geolon)
 }
 
 // LATToLMT implements swego.Interface.
 func (w *wrapper) LATToLMT(jdLAT, geolon float64) (float64, error) {
-	panic("not implemented")
+	return latToLMT(jdLAT, geolon)
 }
 
 // SidTime0 implements swego.Interface.

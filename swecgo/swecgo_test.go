@@ -85,16 +85,16 @@ func TestCalc_error(t *testing.T) {
 		Call(nil, func(_ swego.Interface) {
 			xx, cfl, err := c.fn(99999999.0, 0, swego.CalcFlags{Flags: 1})
 
+			if err.Error() != c.err {
+				t.Fatalf("err != %q, got: %q", err, c.err)
+			}
+
 			if xx != ([6]float64{}) {
 				t.Error("xx != [6]float{}, got:", xx)
 			}
 
 			if cfl != -1 {
 				t.Error("xx != -1, got:", cfl)
-			}
-
-			if err.Error() != c.err {
-				t.Errorf("err != %q, got: %q", err, c.err)
 			}
 		})
 	}
@@ -155,12 +155,12 @@ func TestGetAyanamsaEx(t *testing.T) {
 				},
 			})
 
-			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
-				t.Errorf("deltaT != %f, got: %f", c.want, got)
+			if err != nil {
+				t.Fatalf("err != nil, got: %q", err)
 			}
 
-			if err != nil {
-				t.Errorf("err != nil, got: %q", err)
+			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
+				t.Errorf("deltaT != %f, got: %f", c.want, got)
 			}
 		})
 	}
@@ -184,6 +184,54 @@ func TestHouseName(t *testing.T) {
 		name := swe.HouseName('P')
 		if name != "Placidus" {
 			t.Error("HouseName('P') != Placidus, got:", name)
+		}
+	})
+}
+
+func TestTimeEqu(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got, err := swe.TimeEqu(2451544.5)
+
+		if err != nil {
+			t.Fatalf("err != nil, got: %q", err)
+		}
+
+		if !inDelta([]float64{got}, []float64{-0.002116}, 1e-6) {
+			t.Errorf("TimeEqu(2451544.5) != -0.002116, got: %f", got)
+		}
+	})
+}
+
+func TestLMTToLAT(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got, err := swe.LMTToLAT(2451544.5, 5.116667)
+
+		if err != nil {
+			t.Fatalf("err != nil, got: %q", err)
+		}
+
+		if !inDelta([]float64{got}, []float64{2451544.497889}, 1e-6) {
+			t.Errorf("LMTToLAT(2451544.5, 5.116667) != 2451544.497889, got: %f", got)
+		}
+	})
+}
+
+func TestLATToLMT(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got, err := swe.LATToLMT(2451544.5, 5.116667)
+
+		if err != nil {
+			t.Fatalf("err != nil, got: %q", err)
+		}
+
+		if !inDelta([]float64{got}, []float64{2451544.502112}, 1e-6) {
+			t.Errorf("LATToLMT(2451544.5, 5.116667) != 2451544.502112, got: %f", got)
 		}
 	})
 }
