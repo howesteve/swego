@@ -110,3 +110,58 @@ func TestPlanetName(t *testing.T) {
 		}
 	})
 }
+
+func TestGetAyanamsa(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		fn   func(float64) float64
+		want float64
+	}{
+		{gWrapper.GetAyanamsa, 24.740393},
+		{gWrapper.GetAyanamsaUT, 24.740393},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(_ swego.Interface) {
+			got := c.fn(2451544.5)
+
+			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
+				t.Errorf("deltaT != %f, got: %f", c.want, got)
+			}
+		})
+	}
+}
+
+func TestGetAyanamsaEx(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		fn   func(float64, swego.AyanamsaExFlags) (float64, error)
+		want float64
+	}{
+		{gWrapper.GetAyanamsaEx, 24.740393},
+		{gWrapper.GetAyanamsaExUT, 24.740393},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(_ swego.Interface) {
+			got, err := c.fn(2451544.5, swego.AyanamsaExFlags{
+				Flags: 1,
+				SidMode: swego.SidMode{
+					Mode:   0,
+					T0:     0,
+					AyanT0: 0,
+				},
+			})
+
+			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
+				t.Errorf("deltaT != %f, got: %f", c.want, got)
+			}
+
+			if err != nil {
+				t.Errorf("err != nil, got: %q", err)
+			}
+		})
+	}
+}

@@ -142,7 +142,6 @@ func calc(et float64, pl int, fl int32) (xx [6]float64, cfl int, err error) {
 	_jd := C.double(et)
 	_pl := C.int(pl)
 	_fl := C.int32(fl)
-
 	_xx := (*C.double)(unsafe.Pointer(&xx[0]))
 
 	err = withError(func(err *C.char) bool {
@@ -157,7 +156,6 @@ func calcUT(ut float64, pl int, fl int32) (xx [6]float64, cfl int, err error) {
 	_jd := C.double(ut)
 	_pl := C.int32(pl)
 	_fl := C.int32(fl)
-
 	_xx := (*C.double)(unsafe.Pointer(&xx[0]))
 
 	err = withError(func(err *C.char) bool {
@@ -180,6 +178,32 @@ func getAyanamsa(et float64) float64 {
 
 func getAyanamsaUT(ut float64) float64 {
 	return float64(C.swe_get_ayanamsa_ut(C.double(ut)))
+}
+
+func getAyanamsaEx(et float64, fl int32) (aya float64, err error) {
+	_jd := C.double(et)
+	_fl := C.int32(fl)
+	_aya := (*C.double)(unsafe.Pointer(&aya))
+
+	err = withError(func(err *C.char) bool {
+		rc := int(C.swe_get_ayanamsa_ex(_jd, _fl, _aya, err))
+		return rc == C.ERR
+	})
+
+	return
+}
+
+func getAyanamsaExUT(ut float64, fl int32) (aya float64, err error) {
+	_jd := C.double(ut)
+	_fl := C.int32(fl)
+	_aya := (*C.double)(unsafe.Pointer(&aya))
+
+	err = withError(func(err *C.char) bool {
+		rc := int(C.swe_get_ayanamsa_ex_ut(_jd, _fl, _aya, err))
+		return rc == C.ERR
+	})
+
+	return
 }
 
 func deltaT(jd float64) float64 {

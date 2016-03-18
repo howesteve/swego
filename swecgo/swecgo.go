@@ -33,6 +33,7 @@ func Call(init func(swe swego.Interface), fn func(swe swego.Interface)) {
 			}
 		}
 
+		gWrapper.fnCh = make(chan func())
 		go gWrapper.runLoop()
 		gWrapper.execute(init)
 	})
@@ -40,15 +41,11 @@ func Call(init func(swe swego.Interface), fn func(swe swego.Interface)) {
 	gWrapper.execute(fn)
 }
 
-var gWrapper = newWrapper()
+var gWrapper = new(wrapper)
 
 type wrapper struct {
 	once sync.Once
 	fnCh chan func()
-}
-
-func newWrapper() *wrapper {
-	return &wrapper{fnCh: make(chan func())}
 }
 
 func (w *wrapper) runLoop() {
@@ -80,22 +77,7 @@ func (w *wrapper) Close() { close() }
 // Version returns the version of the Swiss Ephemeris.
 func (w *wrapper) Version() string { return Version }
 
-// Calc calculates the position and optionally the speed of planet pl at Julian
-// Date (in Ephemeris Time) et with calculation flags fl.
-func (w *wrapper) Calc(et float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
-	setFlagState(fl)
-	return calc(et, pl, fl.Flags)
-}
-
-// CalcUT calculates the position and optionally the speed of planet pl at
-// Julian Date (in Universal Time) ut with calculation flags fl. Within the C
-// library swe_deltat is called to convert Universal Time to Ephemeris Time.
-func (w *wrapper) CalcUT(ut float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
-	setFlagState(fl)
-	return calcUT(ut, pl, fl.Flags)
-}
-
-func setFlagState(fl swego.CalcFlags) {
+func setCalcFlagsState(fl swego.CalcFlags) {
 	if (fl.Flags & flgTopo) == flgTopo {
 		setTopo(fl.TopoLoc.Long, fl.TopoLoc.Lat, fl.TopoLoc.Alt)
 	}
@@ -109,19 +91,50 @@ func setFlagState(fl swego.CalcFlags) {
 	}
 }
 
+// Calc calculates the position and optionally the speed of planet pl at Julian
+// Date (in Ephemeris Time) et with calculation flags fl.
+func (w *wrapper) Calc(et float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
+	setCalcFlagsState(fl)
+	return calc(et, pl, fl.Flags)
+}
+
+// CalcUT calculates the position and optionally the speed of planet pl at
+// Julian Date (in Universal Time) ut with calculation flags fl. Within the C
+// library swe_deltat is called to convert Universal Time to Ephemeris Time.
+func (w *wrapper) CalcUT(ut float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
+	setCalcFlagsState(fl)
+	return calcUT(ut, pl, fl.Flags)
+}
+
 // PlanetName returns the name of planet pl.
 func (w *wrapper) PlanetName(pl int) string { return planetName(pl) }
 
+// GetAyanamsa returns the ayanamsa for Julian Date (in Ephemeris Time) et.
 func (w *wrapper) GetAyanamsa(et float64) float64 { return getAyanamsa(et) }
 
+// GetAyanamsaUT returns the ayanamsa for Julian Date (in Universal Time) ut.
 func (w *wrapper) GetAyanamsaUT(ut float64) float64 { return getAyanamsaUT(ut) }
 
-func (w *wrapper) GetAyanamsaEx(et float64, fl swego.AyanamsaExFlags) (float64, error) {
-	panic("not implemented")
+func setAyanamsaExFlagsState(fl swego.AyanamsaExFlags) {
+	if (fl.Flags & flgSidereal) == flgSidereal {
+		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
+	}
 }
 
+// GetAyanamsaEx returns the ayanamsa for Julian Date (in Ephemeris Time) et.
+// It is equal to GetAyanamsa but uses the ΔT consistent with the ephemeris
+// passed in fl.Flags.
+func (w *wrapper) GetAyanamsaEx(et float64, fl swego.AyanamsaExFlags) (float64, error) {
+	setAyanamsaExFlagsState(fl)
+	return getAyanamsaEx(et, fl.Flags)
+}
+
+// GetAyanamsaExUT returns the ayanamsa for Julian Date (in Universal Time) ut.
+// It is equal to GetAyanamsaUT but uses the ΔT consistent with the ephemeris
+// passed in fl.Flags.
 func (w *wrapper) GetAyanamsaExUT(ut float64, fl swego.AyanamsaExFlags) (float64, error) {
-	panic("not implemented")
+	setAyanamsaExFlagsState(fl)
+	return getAyanamsaExUT(ut, fl.Flags)
 }
 
 func (w *wrapper) GetAyanamsaName(sidmode int32) string {
