@@ -224,3 +224,14 @@ func deltaTEx(jd float64, eph int32) (float64, error) {
 
 	return deltaT, err
 }
+
+func sidTime0(ut, eps, nut float64) float64 {
+	_ut := C.double(ut)
+	_eps := C.double(eps)
+	_nut := C.double(nut)
+	return float64(C.swe_sidtime0(_ut, _eps, _nut))
+}
+
+func sidTime(ut float64) float64 {
+	return float64(C.swe_sidtime(C.double(ut)))
+}

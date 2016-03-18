@@ -210,10 +210,8 @@ func (w *wrapper) LATToLMT(jdLAT, geolon float64) (float64, error) {
 
 // SidTime0 implements swego.Interface.
 func (w *wrapper) SidTime0(ut, eps, nut float64) float64 {
-	panic("not implemented")
+	return sidTime0(ut, eps, nut)
 }
 
 // SidTime implements swego.Interface.
-func (w *wrapper) SidTime(ut float64) float64 {
-	panic("not implemented")
-}
+func (w *wrapper) SidTime(ut float64) float64 { return sidTime(ut) }

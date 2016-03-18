@@ -176,3 +176,27 @@ func TestGetAyanamsaName(t *testing.T) {
 		}
 	})
 }
+
+func TestSidTime0(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got := swe.SidTime0(2451544.5, 23.439279, -0.003869)
+
+		if !inDelta([]float64{got}, []float64{6.664283}, 1e-6) {
+			t.Errorf("SidTime0(2451544.5, 23.439279, -0.003869) != 6.664283, got: %f", got)
+		}
+	})
+}
+
+func TestSidTime(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got := swe.SidTime(2451544.5)
+
+		if !inDelta([]float64{got}, []float64{6.664283}, 1e-6) {
+			t.Errorf("SidTime(2451544.5) != 6.664283, got: %f", got)
+		}
+	})
+}

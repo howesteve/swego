@@ -136,6 +136,10 @@ type Interface interface {
 	LMTToLAT(jdLMT, geolon float64) (float64, error)
 	LATToLMT(jdLAT, geolon float64) (float64, error)
 
+	// SidTime0 returns the sidereal time for Julian Date jd, ecliptic obliquity
+	// eps and nutation nut at the Greenwich medidian, measured in hours.
 	SidTime0(ut, eps, nut float64) float64
+	// SidTime returns the sidereal time for Julian Date jd at the Greenwich
+	// medidian, measured in hours.
 	SidTime(ut float64) float64
 }
