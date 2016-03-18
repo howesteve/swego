@@ -137,8 +137,9 @@ func (w *wrapper) GetAyanamsaExUT(ut float64, fl swego.AyanamsaExFlags) (float64
 	return getAyanamsaExUT(ut, fl.Flags)
 }
 
+// GetAyanamsaName returns the name of sidmode.
 func (w *wrapper) GetAyanamsaName(sidmode int32) string {
-	panic("not implemented")
+	return getAyanamsaName(sidmode)
 }
 
 func (w *wrapper) JulDay(y, m, d int, h float64, ct swego.CalType) float64 {

@@ -206,6 +206,10 @@ func getAyanamsaExUT(ut float64, fl int32) (aya float64, err error) {
 	return
 }
 
+func getAyanamsaName(sidmode int32) string {
+	return C.GoString(C.swe_get_ayanamsa_name(C.int32(sidmode)))
+}
+
 func deltaT(jd float64) float64 {
 	return float64(C.swe_deltat(C.double(jd)))
 }

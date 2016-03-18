@@ -165,3 +165,14 @@ func TestGetAyanamsaEx(t *testing.T) {
 		})
 	}
 }
+
+func TestGetAyanamsaName(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		name := swe.GetAyanamsaName(0)
+		if name != "Fagan/Bradley" {
+			t.Error("GetAyanamsaName(0) != Fagan/Bradley, got:", name)
+		}
+	})
+}
