@@ -105,10 +105,26 @@ type Interface interface {
 	// Calendar type ct is used to clearify the year y, Julian or Gregorian.
 	JdUT1ToUTC(ut1 float64, ct CalType) (y, m, d, h, i int, s float64)
 
-	Houses(ut, geolat, geolon float64, hsys int) ([]float64, [10]float64)
-	HousesEx(ut float64, fl HousesExFlags, geolat, geolon float64, hsys int) ([]float64, [10]float64)
-	HousesArmc(armc, geolat, eps float64, hsys int) ([]float64, [10]float64)
-	HousePos(armc, geolat, eps float64, hsys int, xpin [2]float64) (float64, error)
+	// Houses returns the house cusps and related positions for the given
+	// geographic location using the given house system. The return values may
+	// contain data in case of an error. Geolat and geolon are in degrees.
+	Houses(ut, geolat, geolon float64, hsys int) ([]float64, [10]float64, error)
+	// HousesEx returns the house cusps and related positions for the given
+	// geographic location using the given house system and the provided flags
+	// (reference frame). The return values may contain data in case of an error.
+	// Geolat and geolon are in degrees.
+	HousesEx(ut float64, fl HousesExFlags, geolat, geolon float64, hsys int) ([]float64, [10]float64, error)
+	// HousesArmc returns the house cusps and related positions for the given
+	// geographic location using the given house system, ecliptic obliquity and
+	// ARMC (also known as RAMC). The return values may contain data in case of
+	// an error. ARMC, geolat, geolon and eps are in degrees.
+	HousesArmc(armc, geolat, eps float64, hsys int) ([]float64, [10]float64, error)
+	// HousePos returns the house position for the ecliptic longitude and
+	// latitude of a planet for a given ARMC (also known as RAMC) and geocentric
+	// latitude using the given house system. ARMC, geolat, eps, pllng and pllat
+	// are in degrees.
+	HousePos(armc, geolat, eps float64, hsys int, pllng, pllat float64) (float64, error)
+	// HouseName returns the name of the house system.
 	HouseName(hsys int) string
 
 	// DeltaT returns the ΔT for the Julian Date jd.

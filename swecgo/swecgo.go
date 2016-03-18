@@ -161,22 +161,22 @@ func (w *wrapper) JdUT1ToUTC(ut1 float64, ct swego.CalType) (y, m, d, h, i int, 
 }
 
 // Houses implements swego.Interface.
-func (w *wrapper) Houses(ut, geolat, geolon float64, hsys int) ([]float64, [10]float64) {
+func (w *wrapper) Houses(ut, geolat, geolon float64, hsys int) ([]float64, [10]float64, error) {
 	panic("not implemented")
 }
 
 // HousesEx implements swego.Interface.
-func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys int) ([]float64, [10]float64) {
+func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys int) ([]float64, [10]float64, error) {
 	panic("not implemented")
 }
 
 // HousesArmc implements swego.Interface.
-func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys int) ([]float64, [10]float64) {
+func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys int) ([]float64, [10]float64, error) {
 	panic("not implemented")
 }
 
 // HousePos implements swego.Interface.
-func (w *wrapper) HousePos(armc, geolat, eps float64, hsys int, xpin [2]float64) (float64, error) {
+func (w *wrapper) HousePos(armc, geolat, eps float64, hsys int, pllng, pllat float64) (float64, error) {
 	panic("not implemented")
 }
 
