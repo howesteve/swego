@@ -28,8 +28,6 @@ func TestCalc(t *testing.T) {
 		cfl int
 	}
 
-	l := Open("")
-	defer l.Close()
 	loc := swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0}
 
 	cases := []struct {
@@ -37,22 +35,30 @@ func TestCalc(t *testing.T) {
 		in   swego.CalcFlags
 		want result
 	}{
-		{l.Calc,
+		{gWrapper.Calc,
 			swego.CalcFlags{Flags: 1},
 			result{[6]float64{279.858461, .000229, .983331}, 1}},
-		{l.CalcUT,
+		{gWrapper.CalcUT,
 			swego.CalcFlags{Flags: 1},
 			result{[6]float64{279.859214, .000229, .983331}, 1}},
-		{l.Calc,
+		{gWrapper.Calc,
 			swego.CalcFlags{Flags: 1 | flgTopo, TopoLoc: loc},
 			result{[6]float64{279.858426, -.000966, .983369}, 32769}},
-		{l.CalcUT,
+		{gWrapper.CalcUT,
 			swego.CalcFlags{Flags: 1 | flgTopo, TopoLoc: loc},
 			result{[6]float64{279.859186, -.000966, .983369}, 32769}},
 	}
 
 	for _, c := range cases {
-		xx, cfl, err := c.fn(2451544.5, 0, c.in)
+		var (
+			xx  [6]float64
+			cfl int
+			err error
+		)
+
+		Call(nil, func(_ swego.Interface) {
+			xx, cfl, err = c.fn(2451544.5, 0, c.in)
+		})
 
 		if err != nil {
 			t.Errorf("err != nil, got: %q", err)
@@ -69,19 +75,24 @@ func TestCalc(t *testing.T) {
 }
 
 func TestCalc_error(t *testing.T) {
-	l := Open("")
-	defer l.Close()
-
 	cases := []struct {
 		fn  func(float64, int, swego.CalcFlags) ([6]float64, int, error)
 		err string
 	}{
-		{l.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
-		{l.CalcUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{gWrapper.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{gWrapper.CalcUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
 	for _, c := range cases {
-		xx, cfl, err := c.fn(99999999.0, 0, swego.CalcFlags{Flags: 1})
+		var (
+			xx  [6]float64
+			cfl int
+			err error
+		)
+
+		Call(nil, func(_ swego.Interface) {
+			xx, cfl, err = c.fn(99999999.0, 0, swego.CalcFlags{Flags: 1})
+		})
 
 		if xx != ([6]float64{}) {
 			t.Error("xx != [6]float{}, got:", xx)
@@ -98,10 +109,12 @@ func TestCalc_error(t *testing.T) {
 }
 
 func TestPlanetName(t *testing.T) {
-	l := Open("")
-	defer l.Close()
+	var name string
 
-	name := l.PlanetName(0)
+	Call(nil, func(swe swego.Interface) {
+		name = swe.PlanetName(0)
+	})
+
 	if name != "Sun" {
 		t.Error("PlanetName(0) != Sun, got:", name)
 	}

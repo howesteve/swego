@@ -2,7 +2,6 @@ package swecgo
 
 import (
 	"errors"
-	"sync"
 	"unsafe"
 )
 
@@ -55,6 +54,7 @@ int swex_supports_tls() {
 
 #cgo CFLAGS: -w
 
+#include <stdlib.h>
 #include "swephexp.h"
 #include "sweph.h"
 
@@ -85,23 +85,10 @@ func supportsTLS() bool {
 	return C.swex_supports_tls() == 1
 }
 
-var gMutex sync.Mutex
-
-func withLock(fn func()) {
-	if supportsTLS() {
-		fn()
-		return
-	}
-
-	gMutex.Lock()
-	fn()
-	gMutex.Unlock()
-}
-
 // Version constant contains the current Swiss Ephemeris version.
 const Version = C.SE_VERSION
 
-// DefaultPath is the default ephemeris path.
+// DefaultPath is the default ephemeris path defined by the library.
 const DefaultPath = C.SE_EPHE_PATH
 
 func setEphePath(path string) {
@@ -141,19 +128,27 @@ const (
 
 const errPrefix = "swecgo: "
 
+func withError(fn func(err *C.char) bool) error {
+	var _err [C.AS_MAXCH]C.char
+
+	if fn(&_err[0]) {
+		return errors.New(errPrefix + C.GoString(&_err[0]))
+	}
+
+	return nil
+}
+
 func calc(et float64, pl int, fl int32) (xx [6]float64, cfl int, err error) {
 	_jd := C.double(et)
 	_pl := C.int(pl)
 	_fl := C.int32(fl)
 
 	_xx := (*C.double)(unsafe.Pointer(&xx[0]))
-	var _err [C.AS_MAXCH]C.char
 
-	cfl = int(C.swe_calc(_jd, _pl, _fl, _xx, &_err[0]))
-	if cfl == C.ERR {
-		err = errors.New(errPrefix + C.GoString(&_err[0]))
-		return
-	}
+	err = withError(func(err *C.char) bool {
+		cfl = int(C.swe_calc(_jd, _pl, _fl, _xx, err))
+		return cfl == C.ERR
+	})
 
 	return
 }
@@ -164,13 +159,11 @@ func calcUT(ut float64, pl int, fl int32) (xx [6]float64, cfl int, err error) {
 	_fl := C.int32(fl)
 
 	_xx := (*C.double)(unsafe.Pointer(&xx[0]))
-	var _err [C.AS_MAXCH]C.char
 
-	cfl = int(C.swe_calc_ut(_jd, _pl, _fl, _xx, &_err[0]))
-	if cfl == C.ERR {
-		err = errors.New(errPrefix + C.GoString(&_err[0]))
-		return
-	}
+	err = withError(func(err *C.char) bool {
+		cfl = int(C.swe_calc_ut(_jd, _pl, _fl, _xx, err))
+		return cfl == C.ERR
+	})
 
 	return
 }
@@ -179,4 +172,27 @@ func planetName(pl int) string {
 	var _name [C.AS_MAXCH]C.char
 	C.swe_get_planet_name(C.int(pl), &_name[0])
 	return C.GoString(&_name[0])
+}
+
+func getAyanamsa(et float64) float64 {
+	return float64(C.swe_get_ayanamsa(C.double(et)))
+}
+
+func getAyanamsaUT(ut float64) float64 {
+	return float64(C.swe_get_ayanamsa_ut(C.double(ut)))
+}
+
+func deltaT(jd float64) float64 {
+	return float64(C.swe_deltat(C.double(jd)))
+}
+
+func deltaTEx(jd float64, eph int32) (float64, error) {
+	var deltaT float64
+
+	err := withError(func(err *C.char) bool {
+		deltaT = float64(C.swe_deltat_ex(C.double(jd), C.int32(eph), err))
+		return *err != '\000'
+	})
+
+	return deltaT, err
 }
