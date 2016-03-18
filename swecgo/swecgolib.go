@@ -210,6 +210,10 @@ func getAyanamsaName(sidmode int32) string {
 	return C.GoString(C.swe_get_ayanamsa_name(C.int32(sidmode)))
 }
 
+func houseName(hsys int) string {
+	return C.GoString(C.swe_house_name(C.int(hsys)))
+}
+
 func deltaT(jd float64) float64 {
 	return float64(C.swe_deltat(C.double(jd)))
 }

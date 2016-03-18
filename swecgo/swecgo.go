@@ -181,9 +181,7 @@ func (w *wrapper) HousePos(armc, geolat, eps float64, hsys int, pllng, pllat flo
 }
 
 // HouseName implements swego.Interface.
-func (w *wrapper) HouseName(hsys int) string {
-	panic("not implemented")
-}
+func (w *wrapper) HouseName(hsys int) string { return houseName(hsys) }
 
 // DeltaT implements swego.Interface.
 func (w *wrapper) DeltaT(jd float64) float64 { return deltaT(jd) }

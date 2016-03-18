@@ -177,6 +177,17 @@ func TestGetAyanamsaName(t *testing.T) {
 	})
 }
 
+func TestHouseName(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		name := swe.HouseName('P')
+		if name != "Placidus" {
+			t.Error("HouseName('P') != Placidus, got:", name)
+		}
+	})
+}
+
 func TestSidTime0(t *testing.T) {
 	t.Parallel()
 
