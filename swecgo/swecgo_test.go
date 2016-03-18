@@ -177,6 +177,42 @@ func TestGetAyanamsaName(t *testing.T) {
 	})
 }
 
+func TestJulDay(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got := swe.JulDay(2000, 1, 1, 0, swego.Gregorian)
+
+		if !inDelta([]float64{got}, []float64{2451544.5}, 1e-6) {
+			t.Errorf("JD != 2451544.5, got: %f", got)
+		}
+	})
+}
+
+func TestRevJul(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		y, m, d, h := swe.RevJul(2451544.5, swego.Gregorian)
+
+		if y != 2000 {
+			t.Errorf("y != 2000, got: %d", y)
+		}
+
+		if m != 1 {
+			t.Errorf("m != 1, got: %d", m)
+		}
+
+		if d != 1 {
+			t.Errorf("d != 1, got: %d", d)
+		}
+
+		if h != 0 {
+			t.Errorf("h != 0, got: %f", h)
+		}
+	})
+}
+
 func TestHouseName(t *testing.T) {
 	t.Parallel()
 

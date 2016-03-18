@@ -85,6 +85,16 @@ func supportsTLS() bool {
 	return C.swex_supports_tls() == 1
 }
 
+func withError(fn func(err *C.char) bool) error {
+	var _err [C.AS_MAXCH]C.char
+
+	if fn(&_err[0]) {
+		return errors.New("swecgo: " + C.GoString(&_err[0]))
+	}
+
+	return nil
+}
+
 // Version constant contains the current Swiss Ephemeris version.
 const Version = C.SE_VERSION
 
@@ -125,18 +135,6 @@ const (
 	flgTopo     = C.SEFLG_TOPOCTR
 	flgSidereal = C.SEFLG_SIDEREAL
 )
-
-const errPrefix = "swecgo: "
-
-func withError(fn func(err *C.char) bool) error {
-	var _err [C.AS_MAXCH]C.char
-
-	if fn(&_err[0]) {
-		return errors.New(errPrefix + C.GoString(&_err[0]))
-	}
-
-	return nil
-}
 
 func calc(et float64, pl int, fl int32) (xx [6]float64, cfl int, err error) {
 	_jd := C.double(et)
@@ -208,6 +206,26 @@ func getAyanamsaExUT(ut float64, fl int32) (aya float64, err error) {
 
 func getAyanamsaName(sidmode int32) string {
 	return C.GoString(C.swe_get_ayanamsa_name(C.int32(sidmode)))
+}
+
+func julDay(y, m, d int, h float64, gf int) float64 {
+	_y := C.int(y)
+	_m := C.int(m)
+	_d := C.int(d)
+	_h := C.double(h)
+	_gf := C.int(gf)
+	return float64(C.swe_julday(_y, _m, _d, _h, _gf))
+}
+
+func revJul(jd float64, gf int) (y, m, d int, h float64) {
+	_jd := C.double(jd)
+	_gf := C.int(gf)
+	_y := (*C.int)(unsafe.Pointer(&y))
+	_m := (*C.int)(unsafe.Pointer(&m))
+	_d := (*C.int)(unsafe.Pointer(&d))
+	_h := (*C.double)(unsafe.Pointer(&h))
+	C.swe_revjul(_jd, _gf, _y, _m, _d, _h)
+	return
 }
 
 func houseName(hsys int) string {

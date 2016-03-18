@@ -137,12 +137,12 @@ func (w *wrapper) GetAyanamsaName(sidmode int32) string {
 
 // JulDay implements swego.Interface.
 func (w *wrapper) JulDay(y, m, d int, h float64, ct swego.CalType) float64 {
-	panic("not implemented")
+	return julDay(y, m, d, h, int(ct))
 }
 
 // RevJul implements swego.Interface.
 func (w *wrapper) RevJul(jd float64, ct swego.CalType) (y, m, d int, h float64) {
-	panic("not implemented")
+	return revJul(jd, int(ct))
 }
 
 // UTCToJD implements swego.Interface.
