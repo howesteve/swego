@@ -146,18 +146,18 @@ func (w *wrapper) RevJul(jd float64, ct swego.CalType) (y, m, d int, h float64) 
 }
 
 // UTCToJD implements swego.Interface.
-func (w *wrapper) UTCToJD(y, m, d int, h float64, ct swego.CalType) (et, ut float64, err error) {
-	panic("not implemented")
+func (w *wrapper) UTCToJD(y, m, d, h, i int, s float64, ct swego.CalType) (et, ut float64, err error) {
+	return utcToJD(y, m, d, h, i, s, int(ct))
 }
 
 // JdETToUTC implements swego.Interface.
 func (w *wrapper) JdETToUTC(et float64, ct swego.CalType) (y, m, d, h, i int, s float64) {
-	panic("not implemented")
+	return jdETToUTC(et, int(ct))
 }
 
 // JdUT1ToUTC implements swego.Interface.
 func (w *wrapper) JdUT1ToUTC(ut1 float64, ct swego.CalType) (y, m, d, h, i int, s float64) {
-	panic("not implemented")
+	return jdUT1ToUTC(ut1, int(ct))
 }
 
 // Houses implements swego.Interface.

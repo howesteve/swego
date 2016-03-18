@@ -228,6 +228,52 @@ func revJul(jd float64, gf int) (y, m, d int, h float64) {
 	return
 }
 
+func utcToJD(y, m, d, h, i int, s float64, gf int) (et, ut float64, err error) {
+	_y := C.int32(y)
+	_m := C.int32(m)
+	_d := C.int32(d)
+	_h := C.int32(h)
+	_i := C.int32(i)
+	_s := C.double(s)
+	_gf := C.int32(gf)
+	var jds [2]C.double
+
+	err = withError(func(err *C.char) bool {
+		rc := int(C.swe_utc_to_jd(_y, _m, _d, _h, _i, _s, _gf, &jds[0], err))
+		return rc == C.ERR
+	})
+
+	et = float64(jds[0])
+	ut = float64(jds[1])
+	return
+}
+
+func jdETToUTC(et float64, gf int) (y, m, d, h, i int, s float64) {
+	_jd := C.double(et)
+	_gf := C.int32(gf)
+	_y := (*C.int32)(unsafe.Pointer(&y))
+	_m := (*C.int32)(unsafe.Pointer(&m))
+	_d := (*C.int32)(unsafe.Pointer(&d))
+	_h := (*C.int32)(unsafe.Pointer(&h))
+	_i := (*C.int32)(unsafe.Pointer(&i))
+	_s := (*C.double)(unsafe.Pointer(&s))
+	C.swe_jdet_to_utc(_jd, _gf, _y, _m, _d, _h, _i, _s)
+	return
+}
+
+func jdUT1ToUTC(ut float64, gf int) (y, m, d, h, i int, s float64) {
+	_jd := C.double(ut)
+	_gf := C.int32(gf)
+	_y := (*C.int32)(unsafe.Pointer(&y))
+	_m := (*C.int32)(unsafe.Pointer(&m))
+	_d := (*C.int32)(unsafe.Pointer(&d))
+	_h := (*C.int32)(unsafe.Pointer(&h))
+	_i := (*C.int32)(unsafe.Pointer(&i))
+	_s := (*C.double)(unsafe.Pointer(&s))
+	C.swe_jdut1_to_utc(_jd, _gf, _y, _m, _d, _h, _i, _s)
+	return
+}
+
 func houseName(hsys int) string {
 	return C.GoString(C.swe_house_name(C.int(hsys)))
 }
