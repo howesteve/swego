@@ -23,6 +23,8 @@ func inDelta(a, b []float64, delta float64) bool {
 }
 
 func TestCalc(t *testing.T) {
+	t.Parallel()
+
 	type result struct {
 		xx  [6]float64
 		cfl int
@@ -50,31 +52,27 @@ func TestCalc(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		var (
-			xx  [6]float64
-			cfl int
-			err error
-		)
-
 		Call(nil, func(_ swego.Interface) {
-			xx, cfl, err = c.fn(2451544.5, 0, c.in)
+			xx, cfl, err := c.fn(2451544.5, 0, c.in)
+
+			if err != nil {
+				t.Errorf("err != nil, got: %q", err)
+			}
+
+			if !inDelta(xx[:], c.want.xx[:], 1e-6) {
+				t.Errorf("xx != %v ± 1e-6, got: %v", c.want.xx, xx)
+			}
+
+			if cfl != c.want.cfl {
+				t.Errorf("cfl != %d, got: %d", cfl, c.want.cfl)
+			}
 		})
-
-		if err != nil {
-			t.Errorf("err != nil, got: %q", err)
-		}
-
-		if !inDelta(xx[:], c.want.xx[:], 1e-6) {
-			t.Errorf("xx != %v ± 1e-6, got: %v", c.want.xx, xx)
-		}
-
-		if cfl != c.want.cfl {
-			t.Errorf("cfl != %d, got: %d", cfl, c.want.cfl)
-		}
 	}
 }
 
 func TestCalc_error(t *testing.T) {
+	t.Parallel()
+
 	cases := []struct {
 		fn  func(float64, int, swego.CalcFlags) ([6]float64, int, error)
 		err string
@@ -84,38 +82,31 @@ func TestCalc_error(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		var (
-			xx  [6]float64
-			cfl int
-			err error
-		)
-
 		Call(nil, func(_ swego.Interface) {
-			xx, cfl, err = c.fn(99999999.0, 0, swego.CalcFlags{Flags: 1})
+			xx, cfl, err := c.fn(99999999.0, 0, swego.CalcFlags{Flags: 1})
+
+			if xx != ([6]float64{}) {
+				t.Error("xx != [6]float{}, got:", xx)
+			}
+
+			if cfl != -1 {
+				t.Error("xx != -1, got:", cfl)
+			}
+
+			if err.Error() != c.err {
+				t.Errorf("err != %q, got: %q", err, c.err)
+			}
 		})
-
-		if xx != ([6]float64{}) {
-			t.Error("xx != [6]float{}, got:", xx)
-		}
-
-		if cfl != -1 {
-			t.Error("xx != -1, got:", cfl)
-		}
-
-		if err.Error() != c.err {
-			t.Errorf("err != %q, got: %q", err, c.err)
-		}
 	}
 }
 
 func TestPlanetName(t *testing.T) {
-	var name string
+	t.Parallel()
 
 	Call(nil, func(swe swego.Interface) {
-		name = swe.PlanetName(0)
+		name := swe.PlanetName(0)
+		if name != "Sun" {
+			t.Error("PlanetName(0) != Sun, got:", name)
+		}
 	})
-
-	if name != "Sun" {
-		t.Error("PlanetName(0) != Sun, got:", name)
-	}
 }
