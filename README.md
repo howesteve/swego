@@ -12,8 +12,8 @@ Currently the following subset of the C API is implemented:
 - [`swe_get_planet_name`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200762)
 - [`swe_set_topo`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200753) (via arguments passed to method)
 - [`swe_set_sid_mode`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200801) (via arguments passed to method)
-- [`swe_get_ayanamsa`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200802) (*you should use `swe_get_ayanamsa_ex`*)
-- [`swe_get_ayanamsa_ut`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200802) (*you should use `swe_get_ayanamsa_ex_ut`*)
+- [`swe_get_ayanamsa`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200802) (_you should use `swe_get_ayanamsa_ex`_)
+- [`swe_get_ayanamsa_ut`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200802) (_you should use `swe_get_ayanamsa_ex_ut`_)
 - [`swe_get_ayanamsa_ex`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200802)
 - [`swe_get_ayanamsa_ex_ut`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200802)
 - `swe_get_ayanamsa_name`
@@ -27,7 +27,7 @@ Currently the following subset of the C API is implemented:
 - [`swe_houses_armc`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200810)
 - [`swe_house_pos`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200814)
 - [`swe_house_name`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200812)
-- [`swe_deltat`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200796) (*you should use `swe_deltat_ex`*)
+- [`swe_deltat`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200796) (_you should use `swe_deltat_ex`_)
 - [`swe_deltat_ex`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200795)
 - [`swe_time_equ`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200793)
 - [`swe_lmt_to_lat`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200793)
@@ -40,6 +40,9 @@ Currently the following subset of the C API is implemented:
 The reason is to eliminate the number of calls a user has to make. This is in contrast with the C API that requires you to call `swe_set_topo` before `swe_calc`. when you are calculating the topocentric position of Venus. Only calling a single C function is important in the context of Go because you like to minimize the number of calls to C.
 
 Currently the implementation is smart about when to call `swe_set_topo`, but it figures this out in via a C call separate of the calculation. So here's room for improvement but this can be done without changing the public API.
+
+## Pronunciation
+The name of this package is pronounced _swie-go_, like cgo: cee-go.
 
 # Example
 ```go
