@@ -43,7 +43,7 @@ type SidMode struct {
 // CalType represents the calendar type used in julian date conversion.
 type CalType int
 
-// HSys represents house system identifiers used in the C library
+// HSys represents house system identifiers used in the C library.
 type HSys rune
 
 // Interface defines a standardized way for interfacing with the Swiss
@@ -69,8 +69,10 @@ type Interface interface {
 	PlanetName(pl int) string
 
 	// GetAyanamsa returns the ayanamsa for Julian Date (in Ephemeris Time) et.
+	// You should use GetAyanamsaEx, see the Programmer's Documentation.
 	GetAyanamsa(et float64, sidmode SidMode) float64
 	// GetAyanamsaUT returns the ayanamsa for Julian Date (in Universal Time) ut.
+	// You should use GetAyanamsaExUT, see the Programmer's Documentation.
 	GetAyanamsaUT(ut float64, sidmode SidMode) float64
 	// GetAyanamsaEx returns the ayanamsa for Julian Date (in Ephemeris Time) et.
 	// It is equal to GetAyanamsa but uses the ΔT consistent with the ephemeris
@@ -124,7 +126,8 @@ type Interface interface {
 	// HouseName returns the name of the house system.
 	HouseName(hsys HSys) string
 
-	// DeltaT returns the ΔT for the Julian Date jd.
+	// DeltaT returns the ΔT for the Julian Date jd. You should use DeltaTEx, see
+	// the Programmer's Documentation.
 	DeltaT(jd float64) float64
 	// DeltaTEx returns the ΔT for the Julian Date jd.
 	DeltaTEx(jd float64, fl int32) (float64, error)
