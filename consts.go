@@ -128,7 +128,6 @@ const (
 	SidmTrueRevati         = 28
 	SidmTruePushya         = 29
 	SidmUser               = 255
-	SidmDefault            = SidmFaganBradley
 )
 
 // // Nodes and apsides calculation bits.
