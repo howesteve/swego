@@ -13,14 +13,15 @@ import (
 // is set, the value of DefaultPath. For more information see the/ Programmer's
 // documentation about swe_set_ephe_path.
 //
-// In mutex-mode only a single fn can be executed at a single time. This is
+// In non-TLS-mode only a single fn can be executed at a single time. This is
 // achieved by a single mutex that is locked before a fn is called and unlocked
 // after fn has been executed.
 //
-// Thread Local Storage-mode is currently not implemented but fn would be
-// called on a single locked thread out of a thread pool, for more information
-// about the locking, see runtime.LockOSThread.
+// TLS-mode (Thread Local Storage) is currently not implemented.
 func Call(init func(swe swego.Interface), fn func(swe swego.Interface)) {
+	// In TLS-mode fn would be called on a single thread in a pool of locked OS
+	// threads. For more information about this see runtime.LockOSThread.
+
 	gWrapper.once.Do(func() {
 		if supportsTLS() {
 			panic("Swiss Ephemeris library with Thread Local Storage enabled " +
