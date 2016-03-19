@@ -52,7 +52,7 @@ import (
 	"github.com/dwlnetnl/swego/swecgo"
 )
 
-func ExampleCall_calcUT() {
+func main() {
 	swecgo.Call(nil, func(swe swego.Interface) {
 		xx, cfl, err := swe.CalcUT(2451544.5, 0, swego.CalcFlags{}) // flags = 0
 		if err != nil {
