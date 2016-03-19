@@ -138,32 +138,31 @@ const (
 	flgSidereal = C.SEFLG_SIDEREAL
 )
 
-func calc(et float64, pl int, fl int32) (xx [6]float64, cfl int, err error) {
-	_jd := C.double(et)
-	_pl := C.int(pl)
+type _calcFunc func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32
+
+func _calc(jd float64, fl int32, fn _calcFunc) (xx [6]float64, cfl int, err error) {
+	_jd := C.double(jd)
 	_fl := C.int32(fl)
 	_xx := (*C.double)(unsafe.Pointer(&xx[0]))
 
 	err = withError(func(err *C.char) bool {
-		cfl = int(C.swe_calc(_jd, _pl, _fl, _xx, err))
+		cfl = int(fn(_jd, _fl, _xx, err))
 		return cfl == C.ERR
 	})
 
 	return
 }
 
-func calcUT(ut float64, pl int, fl int32) (xx [6]float64, cfl int, err error) {
-	_jd := C.double(ut)
-	_pl := C.int32(pl)
-	_fl := C.int32(fl)
-	_xx := (*C.double)(unsafe.Pointer(&xx[0]))
-
-	err = withError(func(err *C.char) bool {
-		cfl = int(C.swe_calc_ut(_jd, _pl, _fl, _xx, err))
-		return cfl == C.ERR
+func calc(et float64, pl int, fl int32) ([6]float64, int, error) {
+	return _calc(et, fl, func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32 {
+		return C.swe_calc(jd, C.int(pl), fl, xx, err)
 	})
+}
 
-	return
+func calcUT(ut float64, pl int, fl int32) ([6]float64, int, error) {
+	return _calc(ut, fl, func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32 {
+		return C.swe_calc_ut(jd, C.int32(pl), fl, xx, err)
+	})
 }
 
 func planetName(pl int) string {
@@ -180,30 +179,32 @@ func getAyanamsaUT(ut float64) float64 {
 	return float64(C.swe_get_ayanamsa_ut(C.double(ut)))
 }
 
-func getAyanamsaEx(et float64, fl int32) (aya float64, err error) {
-	_jd := C.double(et)
+type _getAyanamsaExFunc func(jd C.double, fl C.int32, aya *C.double, err *C.char) C.int32
+
+func _getAyanamsaEx(jd float64, fl int32, fn _getAyanamsaExFunc) (aya float64, err error) {
+	_jd := C.double(jd)
 	_fl := C.int32(fl)
 	_aya := (*C.double)(unsafe.Pointer(&aya))
 
 	err = withError(func(err *C.char) bool {
-		rc := int(C.swe_get_ayanamsa_ex(_jd, _fl, _aya, err))
+		rc := int(fn(_jd, _fl, _aya, err))
+		// rc := int(C.swe_get_ayanamsa_ex(_jd, _fl, _aya, err))
 		return rc == C.ERR
 	})
 
 	return
 }
 
-func getAyanamsaExUT(ut float64, fl int32) (aya float64, err error) {
-	_jd := C.double(ut)
-	_fl := C.int32(fl)
-	_aya := (*C.double)(unsafe.Pointer(&aya))
-
-	err = withError(func(err *C.char) bool {
-		rc := int(C.swe_get_ayanamsa_ex_ut(_jd, _fl, _aya, err))
-		return rc == C.ERR
+func getAyanamsaEx(et float64, fl int32) (float64, error) {
+	return _getAyanamsaEx(et, fl, func(jd C.double, fl C.int32, aya *C.double, err *C.char) C.int32 {
+		return C.swe_get_ayanamsa_ex(jd, fl, aya, err)
 	})
+}
 
-	return
+func getAyanamsaExUT(ut float64, fl int32) (float64, error) {
+	return _getAyanamsaEx(ut, fl, func(jd C.double, fl C.int32, aya *C.double, err *C.char) C.int32 {
+		return C.swe_get_ayanamsa_ex_ut(jd, fl, aya, err)
+	})
 }
 
 func getAyanamsaName(sidmode int32) string {
@@ -250,8 +251,10 @@ func utcToJD(y, m, d, h, i int, s float64, gf int) (et, ut float64, err error) {
 	return
 }
 
-func jdETToUTC(et float64, gf int) (y, m, d, h, i int, s float64) {
-	_jd := C.double(et)
+type _jdToUTCFunc func(jd C.double, gf C.int32, y, m, d, h, i *C.int32, s *C.double)
+
+func _jdToUTC(jd float64, gf int, fn _jdToUTCFunc) (y, m, d, h, i int, s float64) {
+	_jd := C.double(jd)
 	_gf := C.int32(gf)
 	_y := (*C.int32)(unsafe.Pointer(&y))
 	_m := (*C.int32)(unsafe.Pointer(&m))
@@ -259,21 +262,20 @@ func jdETToUTC(et float64, gf int) (y, m, d, h, i int, s float64) {
 	_h := (*C.int32)(unsafe.Pointer(&h))
 	_i := (*C.int32)(unsafe.Pointer(&i))
 	_s := (*C.double)(unsafe.Pointer(&s))
-	C.swe_jdet_to_utc(_jd, _gf, _y, _m, _d, _h, _i, _s)
+	fn(_jd, _gf, _y, _m, _d, _h, _i, _s)
 	return
 }
 
+func jdETToUTC(et float64, gf int) (y, m, d, h, i int, s float64) {
+	return _jdToUTC(et, gf, func(jd C.double, gf C.int32, y, m, d, h, i *C.int32, s *C.double) {
+		C.swe_jdet_to_utc(jd, gf, y, m, d, h, i, s)
+	})
+}
+
 func jdUT1ToUTC(ut float64, gf int) (y, m, d, h, i int, s float64) {
-	_jd := C.double(ut)
-	_gf := C.int32(gf)
-	_y := (*C.int32)(unsafe.Pointer(&y))
-	_m := (*C.int32)(unsafe.Pointer(&m))
-	_d := (*C.int32)(unsafe.Pointer(&d))
-	_h := (*C.int32)(unsafe.Pointer(&h))
-	_i := (*C.int32)(unsafe.Pointer(&i))
-	_s := (*C.double)(unsafe.Pointer(&s))
-	C.swe_jdut1_to_utc(_jd, _gf, _y, _m, _d, _h, _i, _s)
-	return
+	return _jdToUTC(ut, gf, func(jd C.double, gf C.int32, y, m, d, h, i *C.int32, s *C.double) {
+		C.swe_jdut1_to_utc(jd, gf, y, m, d, h, i, s)
+	})
 }
 
 type _housesFunc func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int
@@ -366,30 +368,31 @@ func timeEqu(jd float64) (E float64, err error) {
 	return
 }
 
-func lmtToLAT(jdLMT, geolon float64) (jdLAT float64, err error) {
-	_lmt := C.double(jdLMT)
-	_geolon := C.double(geolon)
-	_lat := (*C.double)(unsafe.Pointer(&jdLAT))
+type _convertLMTLATFunc func(from, lng C.double, to *C.double, err *C.char) C.int32
+
+func _convertLMTLAT(from, geolon float64, fn _convertLMTLATFunc) (to float64, err error) {
+	_from := C.double(from)
+	_lng := C.double(geolon)
+	_to := (*C.double)(unsafe.Pointer(&to))
 
 	err = withError(func(err *C.char) bool {
-		rc := int(C.swe_lmt_to_lat(_lmt, _geolon, _lat, err))
+		rc := int(fn(_from, _lng, _to, err))
 		return rc == C.ERR
 	})
 
 	return
 }
 
-func latToLMT(jdLAT, geolon float64) (jdLMT float64, err error) {
-	_lat := C.double(jdLAT)
-	_geolon := C.double(geolon)
-	_lmt := (*C.double)(unsafe.Pointer(&jdLMT))
-
-	err = withError(func(err *C.char) bool {
-		rc := int(C.swe_lat_to_lmt(_lat, _geolon, _lmt, err))
-		return rc == C.ERR
+func lmtToLAT(jdLMT, geolon float64) (float64, error) {
+	return _convertLMTLAT(jdLMT, geolon, func(from, lng C.double, to *C.double, err *C.char) C.int32 {
+		return C.swe_lmt_to_lat(from, lng, to, err)
 	})
+}
 
-	return
+func latToLMT(jdLAT, geolon float64) (float64, error) {
+	return _convertLMTLAT(jdLAT, geolon, func(from, lng C.double, to *C.double, err *C.char) C.int32 {
+		return C.swe_lat_to_lmt(from, lng, to, err)
+	})
 }
 
 func sidTime0(ut, eps, nut float64) float64 {
