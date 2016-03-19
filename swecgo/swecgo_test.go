@@ -159,7 +159,7 @@ func TestGetAyanamsaEx(t *testing.T) {
 				t.Fatalf("err != nil, got: %q", err)
 			}
 
-			if !inDelta([]float64{c.want}, []float64{got}, 1e-6) {
+			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
 				t.Errorf("deltaT != %f, got: %f", c.want, got)
 			}
 		})
@@ -183,7 +183,7 @@ func TestJulDay(t *testing.T) {
 	Call(nil, func(swe swego.Interface) {
 		got := swe.JulDay(2000, 1, 1, 0, swego.Gregorian)
 
-		if !inDelta([]float64{2451544.5}, []float64{got}, 1e-6) {
+		if !inDelta([]float64{got}, []float64{2451544.5}, 1e-6) {
 			t.Errorf("JD != 2451544.5, got: %f", got)
 		}
 	})
@@ -226,7 +226,7 @@ func TestUTCToJD(t *testing.T) {
 			t.Fatalf("err != nil, got: %q", err)
 		}
 
-		if !inDelta(want, got, 1e-6) {
+		if !inDelta(got, want, 1e-6) {
 			t.Errorf("[et, ut] != %v, got: %f", want, got)
 		}
 	})
@@ -258,7 +258,7 @@ func TestJDETToUTC(t *testing.T) {
 			t.Errorf("i != 58, got: %d", i)
 		}
 
-		if !inDelta([]float64{55.815999}, []float64{s}, 1e-6) {
+		if !inDelta([]float64{s}, []float64{55.815999}, 1e-6) {
 			t.Errorf("s != 55.815999 ± 1e-6, got: %f", s)
 		}
 	})
@@ -290,10 +290,288 @@ func TestJDUT1ToUTC(t *testing.T) {
 			t.Errorf("i != 59, got: %d", i)
 		}
 
-		if !inDelta([]float64{59.645586}, []float64{s}, 1e-6) {
+		if !inDelta([]float64{s}, []float64{59.645586}, 1e-6) {
 			t.Errorf("s != 59.645586 ± 1e-6, got: %f", s)
 		}
 	})
+}
+
+func TestHouses(t *testing.T) {
+	t.Parallel()
+
+	type input struct {
+		geolat float64
+		hsys   int
+	}
+
+	type result struct {
+		cusps []float64
+		ascmc [10]float64
+		err   string
+	}
+
+	cases := []struct {
+		in   input
+		want result
+	}{
+		{input{52.083333, 'P'}, result{
+			[]float64{0,
+				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
+				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
+			},
+			[10]float64{
+				190.553653, 103.886819, 105.080915, 24.306488,
+				196.367263, 214.734661, 192.275917, 34.734661,
+			},
+			"",
+		}},
+		{input{82.083333, 'K'}, result{
+			[]float64{0,
+				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
+				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
+			},
+			[10]float64{
+				183.972931, 103.886819, 105.080915, 17.393326,
+				196.367263, 352.493044, 195.452718, 172.493044,
+			},
+			"swecgo: error calculating houses",
+		}},
+		{input{52.083333, 'G'}, result{
+			[]float64{0,
+				190.553653, 183.704634, 176.258623, 168.152982, 159.330891, 149.746713,
+				139.373115, 128.213369, 116.328153, 103.886819, 91.215325, 78.741976,
+				66.822987, 55.634583, 45.214174, 35.538288, 26.565986, 18.252908,
+				10.553653, 3.704634, 356.258623, 348.152982, 339.330891, 329.746713,
+				319.373115, 308.213369, 296.328153, 283.886819, 271.215325, 258.741976,
+				246.822987, 235.634583, 225.214174, 215.538288, 206.565986, 198.252908,
+			},
+			[10]float64{
+				190.553653, 103.886819, 105.080915, 24.306488,
+				196.367263, 214.734661, 192.275917, 34.734661,
+			},
+			"",
+		}},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(swe swego.Interface) {
+			cusps, ascmc, err := swe.Houses(2451544.5, c.in.geolat, 5.116667, c.in.hsys)
+
+			if c.want.err != "" && c.want.err != err.Error() {
+				t.Fatalf("(%f, %c) err != %q, got: %q",
+					c.in.geolat, c.in.hsys, c.want.err, err)
+			}
+
+			if !inDelta(cusps, c.want.cusps, 1e-6) {
+				t.Errorf("(%f, %c) cusps != %v, got: %v",
+					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
+			}
+
+			if !inDelta(ascmc[:], c.want.ascmc[:], 1e-6) {
+				t.Errorf("(%f, %c) ascmc != %v, got: %v",
+					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
+			}
+		})
+	}
+}
+
+func TestHousesEx(t *testing.T) {
+	t.Parallel()
+
+	type input struct {
+		geolat float64
+		hsys   int
+	}
+
+	type result struct {
+		cusps []float64
+		ascmc [10]float64
+		err   string
+	}
+
+	cases := []struct {
+		in   input
+		want result
+	}{
+		{input{52.083333, 'P'}, result{
+			[]float64{0,
+				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
+				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
+			},
+			[10]float64{
+				190.553653, 103.886819, 105.080915, 24.306488,
+				196.367263, 214.734661, 192.275917, 34.734661,
+			},
+			"",
+		}},
+		{input{82.083333, 'K'}, result{
+			[]float64{0,
+				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
+				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
+			},
+			[10]float64{
+				183.972931, 103.886819, 105.080915, 17.393326,
+				196.367263, 352.493044, 195.452718, 172.493044,
+			},
+			"swecgo: error calculating houses",
+		}},
+		{input{52.083333, 'G'}, result{
+			[]float64{0,
+				190.553653, 183.704634, 176.258623, 168.152982, 159.330891, 149.746713,
+				139.373115, 128.213369, 116.328153, 103.886819, 91.215325, 78.741976,
+				66.822987, 55.634583, 45.214174, 35.538288, 26.565986, 18.252908,
+				10.553653, 3.704634, 356.258623, 348.152982, 339.330891, 329.746713,
+				319.373115, 308.213369, 296.328153, 283.886819, 271.215325, 258.741976,
+				246.822987, 235.634583, 225.214174, 215.538288, 206.565986, 198.252908,
+			},
+			[10]float64{
+				190.553653, 103.886819, 105.080915, 24.306488,
+				196.367263, 214.734661, 192.275917, 34.734661,
+			},
+			"",
+		}},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(swe swego.Interface) {
+			cusps, ascmc, err := swe.HousesEx(2451544.5, swego.HousesExFlags{},
+				c.in.geolat, 5.116667, c.in.hsys)
+
+			if c.want.err != "" && c.want.err != err.Error() {
+				t.Fatalf("(%f, %c) err != %q, got: %q",
+					c.in.geolat, c.in.hsys, c.want.err, err)
+			}
+
+			if !inDelta(cusps, c.want.cusps, 1e-6) {
+				t.Errorf("(%f, %c) cusps != %v, got: %v",
+					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
+			}
+
+			if !inDelta(ascmc[:], c.want.ascmc[:], 1e-6) {
+				t.Errorf("(%f, %c) ascmc != %v, got: %v",
+					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
+			}
+		})
+	}
+}
+
+func TestHousesArmc(t *testing.T) {
+	t.Parallel()
+
+	type input struct {
+		geolat float64
+		hsys   int
+	}
+
+	type result struct {
+		cusps []float64
+		ascmc [10]float64
+		err   string
+	}
+
+	cases := []struct {
+		in   input
+		want result
+	}{
+		{input{52.083333, 'P'}, result{
+			[]float64{0,
+				190.553489, 215.537888, 246.822499, 283.886657, 319.373244, 348.153088,
+				10.553489, 35.537888, 66.822499, 103.886657, 139.373244, 168.153088,
+			},
+			[10]float64{
+				190.553489, 103.886657, 105.080916, 24.307632,
+				196.367450, 214.737779, 192.275825, 34.737779,
+			},
+			"",
+		}},
+		{input{82.083333, 'K'}, result{
+			[]float64{0,
+				183.972748, 217.277384, 250.582021, 283.886657, 310.582021, 337.277384,
+				3.972748, 37.277384, 70.582021, 103.886657, 130.582021, 157.277384,
+			},
+			[10]float64{
+				183.972748, 103.886657, 105.080916, 17.393607,
+				196.367450, 352.493777, 195.452830, 172.493777,
+			},
+			"swecgo: error calculating houses",
+		}},
+		{input{52.083333, 'G'}, result{
+			[]float64{0,
+				190.553489, 183.704585, 176.258665, 168.153088, 159.331033, 149.746863,
+				139.373244, 128.213442, 116.328129, 103.886657, 91.215011, 78.741543,
+				66.822499, 55.634096, 45.213720, 35.537888, 26.565652, 18.252653,
+				10.553489, 3.704585, 356.258665, 348.153088, 339.331033, 329.746863,
+				319.373244, 308.213442, 296.328129, 283.886657, 271.215011, 258.741543,
+				246.822499, 235.634096, 225.213720, 215.537888, 206.565652, 198.252653,
+			},
+			[10]float64{
+				190.553489, 103.886657, 105.080916, 24.307632,
+				196.367450, 214.737779, 192.275825, 34.737779,
+			},
+			"",
+		}},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(swe swego.Interface) {
+			cusps, ascmc, err := swe.HousesArmc(105.080916, c.in.geolat, 23.439279, c.in.hsys)
+
+			if c.want.err != "" && c.want.err != err.Error() {
+				t.Fatalf("(%f, %c) err != %q, got: %q",
+					c.in.geolat, c.in.hsys, c.want.err, err)
+			}
+
+			if !inDelta(cusps, c.want.cusps, 1e-6) {
+				t.Errorf("(%f, %c) cusps != %v, got: %v",
+					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
+			}
+
+			if !inDelta(ascmc[:], c.want.ascmc[:], 1e-6) {
+				t.Errorf("(%f, %c) ascmc != %v, got: %v",
+					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
+			}
+		})
+	}
+}
+
+func TestHousePos(t *testing.T) {
+	t.Parallel()
+
+	type input struct {
+		geolat float64
+		hsys   int
+	}
+
+	type result struct {
+		pos float64
+		err string
+	}
+
+	cases := []struct {
+		in   input
+		want result
+	}{
+		{input{52.083333, 'P'}, result{6.355326, ""}},
+		{input{82.083333, 'K'}, result{6.355326, ""}},
+		{input{52.083333, 'G'}, result{20.934023, ""}},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(swe swego.Interface) {
+			pos, err := swe.HousePos(105.080916, c.in.geolat, 23.439279, c.in.hsys,
+				279.858461, 0.000229)
+
+			if c.want.err != "" && c.want.err != err.Error() {
+				t.Fatalf("(%f, %c) err != %q, got: %q",
+					c.in.geolat, c.in.hsys, c.want.err, err)
+			}
+
+			if !inDelta([]float64{pos}, []float64{c.want.pos}, 1e-6) {
+				t.Errorf("(%f, %c) pos != %f, got: %f",
+					c.in.geolat, c.in.hsys, c.want.pos, pos)
+			}
+		})
+	}
 }
 
 func TestHouseName(t *testing.T) {
@@ -301,6 +579,7 @@ func TestHouseName(t *testing.T) {
 
 	Call(nil, func(swe swego.Interface) {
 		name := swe.HouseName('P')
+
 		if name != "Placidus" {
 			t.Error("HouseName('P') != Placidus, got:", name)
 		}
@@ -317,7 +596,7 @@ func TestTimeEqu(t *testing.T) {
 			t.Fatalf("err != nil, got: %q", err)
 		}
 
-		if !inDelta([]float64{-0.002116}, []float64{got}, 1e-6) {
+		if !inDelta([]float64{got}, []float64{-0.002116}, 1e-6) {
 			t.Errorf("TimeEqu(2451544.5) != -0.002116, got: %f", got)
 		}
 	})

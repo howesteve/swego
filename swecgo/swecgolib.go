@@ -85,11 +85,13 @@ func supportsTLS() bool {
 	return C.swex_supports_tls() == 1
 }
 
+const errPrefix = "swecgo: "
+
 func withError(fn func(err *C.char) bool) error {
 	var _err [C.AS_MAXCH]C.char
 
 	if fn(&_err[0]) {
-		return errors.New("swecgo: " + C.GoString(&_err[0]))
+		return errors.New(errPrefix + C.GoString(&_err[0]))
 	}
 
 	return nil
@@ -274,6 +276,68 @@ func jdUT1ToUTC(ut float64, gf int) (y, m, d, h, i int, s float64) {
 	return
 }
 
+type _housesFunc func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int
+
+func _houses(lat float64, hsys int, fn _housesFunc) (_ []float64, ascmc [10]float64, err error) {
+	_lat := C.double(lat)
+	_hsys := C.int(hsys)
+
+	var cusps [37]float64
+	_cusps := (*C.double)(unsafe.Pointer(&cusps[0]))
+	_ascmc := (*C.double)(unsafe.Pointer(&ascmc[0]))
+
+	if C.ERR == fn(_lat, _hsys, _cusps, _ascmc) {
+		err = errors.New(errPrefix + "error calculating houses")
+	}
+
+	n := 13
+	if hsys == 'G' {
+		n = 37
+	}
+
+	return cusps[:n:n], ascmc, err
+}
+
+func houses(ut, lat, lng float64, hsys int) ([]float64, [10]float64, error) {
+	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
+		_jd := C.double(ut)
+		_lng := C.double(lng)
+		return C.swe_houses(_jd, lat, _lng, hsys, cusps, ascmc)
+	})
+}
+
+func housesEx(ut float64, fl int32, lat, lng float64, hsys int) ([]float64, [10]float64, error) {
+	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
+		_jd := C.double(ut)
+		_fl := C.int32(fl)
+		_lng := C.double(lng)
+		return C.swe_houses_ex(_jd, _fl, lat, _lng, hsys, cusps, ascmc)
+	})
+}
+
+func housesArmc(armc, lat, eps float64, hsys int) ([]float64, [10]float64, error) {
+	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
+		_armc := C.double(armc)
+		_eps := C.double(eps)
+		return C.swe_houses_armc(_armc, lat, _eps, hsys, cusps, ascmc)
+	})
+}
+
+func housePos(armc, geolat, eps float64, hsys int, pllng, pllat float64) (pos float64, err error) {
+	_armc := C.double(armc)
+	_lat := C.double(geolat)
+	_eps := C.double(eps)
+	_hsys := C.int(hsys)
+	xpin := [2]C.double{C.double(pllat), C.double(pllng)}
+
+	err = withError(func(err *C.char) bool {
+		pos = float64(C.swe_house_pos(_armc, _lat, _eps, _hsys, &xpin[0], err))
+		return *err != '\000'
+	})
+
+	return
+}
+
 func houseName(hsys int) string {
 	return C.GoString(C.swe_house_name(C.int(hsys)))
 }
@@ -282,15 +346,13 @@ func deltaT(jd float64) float64 {
 	return float64(C.swe_deltat(C.double(jd)))
 }
 
-func deltaTEx(jd float64, eph int32) (float64, error) {
-	var deltaT float64
-
-	err := withError(func(err *C.char) bool {
+func deltaTEx(jd float64, eph int32) (deltaT float64, err error) {
+	err = withError(func(err *C.char) bool {
 		deltaT = float64(C.swe_deltat_ex(C.double(jd), C.int32(eph), err))
 		return *err != '\000'
 	})
 
-	return deltaT, err
+	return
 }
 
 func timeEqu(jd float64) (E float64, err error) {

@@ -162,22 +162,26 @@ func (w *wrapper) JdUT1ToUTC(ut1 float64, ct swego.CalType) (y, m, d, h, i int, 
 
 // Houses implements swego.Interface.
 func (w *wrapper) Houses(ut, geolat, geolon float64, hsys int) ([]float64, [10]float64, error) {
-	panic("not implemented")
+	return houses(ut, geolat, geolon, hsys)
 }
 
 // HousesEx implements swego.Interface.
 func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys int) ([]float64, [10]float64, error) {
-	panic("not implemented")
+	if (fl.Flags & flgSidereal) == flgSidereal {
+		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
+	}
+
+	return housesEx(ut, fl.Flags, geolat, geolon, hsys)
 }
 
 // HousesArmc implements swego.Interface.
 func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys int) ([]float64, [10]float64, error) {
-	panic("not implemented")
+	return housesArmc(armc, geolat, eps, hsys)
 }
 
 // HousePos implements swego.Interface.
 func (w *wrapper) HousePos(armc, geolat, eps float64, hsys int, pllng, pllat float64) (float64, error) {
-	panic("not implemented")
+	return housePos(armc, geolat, eps, hsys, pllng, pllat)
 }
 
 // HouseName implements swego.Interface.
