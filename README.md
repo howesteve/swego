@@ -40,3 +40,32 @@ Currently the following subset of the C API is implemented:
 The reason is to eliminate the number of calls a user has to make. This is in contrast with the C API that requires you to call `swe_set_topo` before `swe_calc`. when you are calculating the topocentric position of Venus. Only calling a single C function is important in the context of Go because you like to minimize the number of calls to C.
 
 Currently the implementation is smart about when to call `swe_set_topo`, but it figures this out in via a C call separate of the calculation. So here's room for improvement but this can be done without changing the public API.
+
+# Example
+```go
+package main
+
+import (
+	"log"
+
+	"github.com/dwlnetnl/swego"
+	"github.com/dwlnetnl/swego/swecgo"
+)
+
+func ExampleCall_calcUT() {
+	swecgo.Call(nil, func(swe swego.Interface) {
+		xx, cfl, err := swe.CalcUT(2451544.5, 0, swego.CalcFlags{}) // flags = 0
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println("xx[0]", xx[0]) // xx[0] 279.8592144230896
+		log.Println("xx[1]", xx[1]) // xx[1] 0.0002296532779708701
+		log.Println("xx[2]", xx[2]) // xx[2] 0.9833318568951198
+		log.Println("xx[3]", xx[3]) // xx[3] 0
+		log.Println("xx[4]", xx[4]) // xx[4] 0
+		log.Println("xx[5]", xx[5]) // xx[5] 0
+		log.Println("cfl", cfl)     // cfl 2
+	})
+}
+```
