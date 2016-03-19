@@ -97,38 +97,38 @@ const (
 
 // Sidereal modes (ayanamsas).
 const (
-	SidmFaganBradley = iota
-	SidmLahiri
-	SidmDeluce
-	SidmRaman
-	SidmUshashashi
-	SidmKrishnamurti
-	SidmDjwhalKhul
-	SidmYukteshwar
-	SidmJNBhasin
-	SidmBabylKruger1
-	SidmBabylKruger2
-	SidmBabylKruger3
-	SidmBabylHuber
-	SidmBabylEtaPiscium
-	SidmAldebaran15Tau
-	SidmHipparchos
-	SidmSassanian
-	SidmGalCent0Sag
-	SidmJ2000
-	SidmJ1900
-	SidmB1950
-	SidmSuryasiddhanta
-	SidmSuryasiddhantaMSun
-	SidmAryabhata
-	SidmAryabhataMSun
-	SidmSSRevati
-	SidmSSCitra
-	SidmTrueCitra
-	SidmTrueRevati
-	SidmTruePushya
-	SidmUser    = 255
-	SidmDefault = SidmFaganBradley
+	SidmFaganBradley       = 0
+	SidmLahiri             = 1
+	SidmDeluce             = 2
+	SidmRaman              = 3
+	SidmUshashashi         = 4
+	SidmKrishnamurti       = 5
+	SidmDjwhalKhul         = 6
+	SidmYukteshwar         = 7
+	SidmJNBhasin           = 8
+	SidmBabylKruger1       = 9
+	SidmBabylKruger2       = 10
+	SidmBabylKruger3       = 11
+	SidmBabylHuber         = 12
+	SidmBabylEtaPiscium    = 13
+	SidmAldebaran15Tau     = 14
+	SidmHipparchos         = 15
+	SidmSassanian          = 16
+	SidmGalCent0Sag        = 17
+	SidmJ2000              = 18
+	SidmJ1900              = 19
+	SidmB1950              = 20
+	SidmSuryasiddhanta     = 21
+	SidmSuryasiddhantaMSun = 22
+	SidmAryabhata          = 23
+	SidmAryabhataMSun      = 24
+	SidmSSRevati           = 25
+	SidmSSCitra            = 26
+	SidmTrueCitra          = 27
+	SidmTrueRevati         = 28
+	SidmTruePushya         = 29
+	SidmUser               = 255
+	SidmDefault            = SidmFaganBradley
 )
 
 // // Nodes and apsides calculation bits.
