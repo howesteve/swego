@@ -1,12 +1,12 @@
 package swego
 
-// Calendar types.
+// Calendar types defined in swephexp.h.
 const (
 	Julian    CalType = 0
 	Gregorian CalType = 1
 )
 
-// Planet, fictional body and asteroid constants.
+// Planet, fictional body and asteroid constants defined in swephexp.h.
 const (
 	Sun          Planet = 0
 	Moon         Planet = 1
@@ -59,7 +59,7 @@ const (
 	AstOffset = 10000
 )
 
-// Indexes of related house positions.
+// Indexes of related house positions defined in swephexp.h.
 const (
 	Asc    = 0
 	MC     = 1
@@ -71,7 +71,7 @@ const (
 	PolAsc = 7 // "polar ascendant" (M. Munkasey)
 )
 
-// Calculation flags.
+// Calculation flags defined in swephexp.h.
 const (
 	FlagEphJPL       = 1 << 0
 	FlagEphSwiss     = 1 << 1
@@ -84,18 +84,18 @@ const (
 	FlagNoGDefl      = 1 << 9
 	FlagNoAbber      = 1 << 10
 	FlagEquatorial   = 1 << 11
-	FlagXYZ          = 1 << 11
-	FlagRadians      = 1 << 12
-	FlagBary         = 1 << 13
-	FlagTopo         = 1 << 14
-	FlagSidereal     = 1 << 15
-	FlagICRS         = 1 << 16
-	FlagJPLHor       = 1 << 17
-	FlagJPLHorApprox = 1 << 18
+	FlagXYZ          = 1 << 12
+	FlagRadians      = 1 << 13
+	FlagBary         = 1 << 14
+	FlagTopo         = 1 << 15
+	FlagSidereal     = 1 << 16
+	FlagICRS         = 1 << 17
+	FlagJPLHor       = 1 << 18
+	FlagJPLHorApprox = 1 << 19
 	FlagEphDefault   = FlagEphSwiss
 )
 
-// Sidereal modes (ayanamsas).
+// Sidereal modes (ayanamsas) implemented in the C library.
 const (
 	SidmFaganBradley       Ayanamsa = 0
 	SidmLahiri             Ayanamsa = 1
@@ -130,7 +130,7 @@ const (
 	SidmUser               Ayanamsa = 255
 )
 
-// // Nodes and apsides calculation bits.
+// // Nodes and apsides calculation bits defined in swephexp.h.
 // const (
 // 	NodBitMean       = 1
 // 	NodBitOscu       = 2
@@ -138,7 +138,7 @@ const (
 // 	NodBitFocalPoint = 256
 // )
 
-// File name of JPL data files.
+// File name of JPL data files defined in swephexp.h.
 const (
 	FnameDE200 = "de200.eph"
 	FnameDE406 = "de406.eph"
@@ -147,7 +147,7 @@ const (
 	FnameDft2  = FnameDE406
 )
 
-// House system constants.
+// House systems implemented in the C library.
 const (
 	Equal                HSys = 'E' // also 'A'
 	Alcabitus            HSys = 'B'

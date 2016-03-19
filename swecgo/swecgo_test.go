@@ -22,6 +22,16 @@ func inDelta(a, b []float64, delta float64) bool {
 	return true
 }
 
+func TestFlagConstCheck(t *testing.T) {
+	if flgSidereal != swego.FlagSidereal {
+		t.Errorf("Sidereal: want %d, got: %d", flgSidereal, swego.FlagSidereal)
+	}
+
+	if flgTopo != swego.FlagTopo {
+		t.Errorf("Topo: want %d, got: %d", flgTopo, swego.FlagTopo)
+	}
+}
+
 func TestVersion(t *testing.T) {
 	t.Parallel()
 
