@@ -8,53 +8,53 @@ const (
 
 // Planet, fictional body and asteroid constants.
 const (
-	Sun          = 0
-	Moon         = 1
-	Mercury      = 2
-	Venus        = 3
-	Mars         = 4
-	Jupiter      = 5
-	Saturn       = 6
-	Uranus       = 7
-	Neptune      = 8
-	Pluto        = 9
-	MeanNode     = 10
-	TrueNode     = 11
-	MeanApogee   = 12
-	OscuApogee   = 13
-	Earth        = 14
-	Chiron       = 15
-	Pholus       = 16
-	Ceres        = 17
-	Pallas       = 18
-	Juno         = 19
-	Vesta        = 20
-	InterApogee  = 21
-	InterPerigee = 22
+	Sun          Planet = 0
+	Moon         Planet = 1
+	Mercury      Planet = 2
+	Venus        Planet = 3
+	Mars         Planet = 4
+	Jupiter      Planet = 5
+	Saturn       Planet = 6
+	Uranus       Planet = 7
+	Neptune      Planet = 8
+	Pluto        Planet = 9
+	MeanNode     Planet = 10
+	TrueNode     Planet = 11
+	MeanApogee   Planet = 12
+	OscuApogee   Planet = 13
+	Earth        Planet = 14
+	Chiron       Planet = 15
+	Pholus       Planet = 16
+	Ceres        Planet = 17
+	Pallas       Planet = 18
+	Juno         Planet = 19
+	Vesta        Planet = 20
+	InterApogee  Planet = 21
+	InterPerigee Planet = 22
 
-	Varuna = AstOffset + 20000
-	Nessus = AstOffset + 7066
+	Varuna Planet = AstOffset + 20000
+	Nessus Planet = AstOffset + 7066
 
-	Cupido   = 40
-	Hades    = 41
-	Zeus     = 42
-	Kronos   = 43
-	Apollon  = 44
-	Admetos  = 45
-	Vulkanus = 46
-	Poseidon = 47
+	Cupido   Planet = 40
+	Hades    Planet = 41
+	Zeus     Planet = 42
+	Kronos   Planet = 43
+	Apollon  Planet = 44
+	Admetos  Planet = 45
+	Vulkanus Planet = 46
+	Poseidon Planet = 47
 
-	Isis             = 48
-	Nibiru           = 49
-	Harrington       = 50
-	NeptuneLeverrier = 51
-	NeptuneAdams     = 52
-	PlutoLowell      = 53
-	PlutoPickering   = 54
-	Vulcan           = 55
-	WhiteMoon        = 56
-	Proserpina       = 57
-	Waldemath        = 58
+	Isis             Planet = 48
+	Nibiru           Planet = 49
+	Harrington       Planet = 50
+	NeptuneLeverrier Planet = 51
+	NeptuneAdams     Planet = 52
+	PlutoLowell      Planet = 53
+	PlutoPickering   Planet = 54
+	Vulcan           Planet = 55
+	WhiteMoon        Planet = 56
+	Proserpina       Planet = 57
+	Waldemath        Planet = 58
 
 	AstOffset = 10000
 )
@@ -97,37 +97,37 @@ const (
 
 // Sidereal modes (ayanamsas).
 const (
-	SidmFaganBradley       = 0
-	SidmLahiri             = 1
-	SidmDeluce             = 2
-	SidmRaman              = 3
-	SidmUshashashi         = 4
-	SidmKrishnamurti       = 5
-	SidmDjwhalKhul         = 6
-	SidmYukteshwar         = 7
-	SidmJNBhasin           = 8
-	SidmBabylKruger1       = 9
-	SidmBabylKruger2       = 10
-	SidmBabylKruger3       = 11
-	SidmBabylHuber         = 12
-	SidmBabylEtaPiscium    = 13
-	SidmAldebaran15Tau     = 14
-	SidmHipparchos         = 15
-	SidmSassanian          = 16
-	SidmGalCent0Sag        = 17
-	SidmJ2000              = 18
-	SidmJ1900              = 19
-	SidmB1950              = 20
-	SidmSuryasiddhanta     = 21
-	SidmSuryasiddhantaMSun = 22
-	SidmAryabhata          = 23
-	SidmAryabhataMSun      = 24
-	SidmSSRevati           = 25
-	SidmSSCitra            = 26
-	SidmTrueCitra          = 27
-	SidmTrueRevati         = 28
-	SidmTruePushya         = 29
-	SidmUser               = 255
+	SidmFaganBradley       Ayanamsa = 0
+	SidmLahiri             Ayanamsa = 1
+	SidmDeluce             Ayanamsa = 2
+	SidmRaman              Ayanamsa = 3
+	SidmUshashashi         Ayanamsa = 4
+	SidmKrishnamurti       Ayanamsa = 5
+	SidmDjwhalKhul         Ayanamsa = 6
+	SidmYukteshwar         Ayanamsa = 7
+	SidmJNBhasin           Ayanamsa = 8
+	SidmBabylKruger1       Ayanamsa = 9
+	SidmBabylKruger2       Ayanamsa = 10
+	SidmBabylKruger3       Ayanamsa = 11
+	SidmBabylHuber         Ayanamsa = 12
+	SidmBabylEtaPiscium    Ayanamsa = 13
+	SidmAldebaran15Tau     Ayanamsa = 14
+	SidmHipparchos         Ayanamsa = 15
+	SidmSassanian          Ayanamsa = 16
+	SidmGalCent0Sag        Ayanamsa = 17
+	SidmJ2000              Ayanamsa = 18
+	SidmJ1900              Ayanamsa = 19
+	SidmB1950              Ayanamsa = 20
+	SidmSuryasiddhanta     Ayanamsa = 21
+	SidmSuryasiddhantaMSun Ayanamsa = 22
+	SidmAryabhata          Ayanamsa = 23
+	SidmAryabhataMSun      Ayanamsa = 24
+	SidmSSRevati           Ayanamsa = 25
+	SidmSSCitra            Ayanamsa = 26
+	SidmTrueCitra          Ayanamsa = 27
+	SidmTrueRevati         Ayanamsa = 28
+	SidmTruePushya         Ayanamsa = 29
+	SidmUser               Ayanamsa = 255
 )
 
 // // Nodes and apsides calculation bits.

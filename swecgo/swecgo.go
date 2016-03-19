@@ -93,19 +93,19 @@ func setCalcFlagsState(fl swego.CalcFlags) {
 }
 
 // Calc implements swego.Interface.
-func (w *wrapper) Calc(et float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
+func (w *wrapper) Calc(et float64, pl swego.Planet, fl swego.CalcFlags) ([6]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calc(et, pl, fl.Flags)
 }
 
 // CalcUT implements swego.Interface.
-func (w *wrapper) CalcUT(ut float64, pl int, fl swego.CalcFlags) ([6]float64, int, error) {
+func (w *wrapper) CalcUT(ut float64, pl swego.Planet, fl swego.CalcFlags) ([6]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calcUT(ut, pl, fl.Flags)
 }
 
 // PlanetName implements swego.Interface.
-func (w *wrapper) PlanetName(pl int) string { return planetName(pl) }
+func (w *wrapper) PlanetName(pl swego.Planet) string { return planetName(pl) }
 
 // GetAyanamsa implements swego.Interface.
 func (w *wrapper) GetAyanamsa(et float64, sidmode swego.SidMode) float64 {

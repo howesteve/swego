@@ -119,7 +119,7 @@ func setTopo(lng, lat, alt float64) {
 	C.swex_set_topo(_lng, _lat, _alt)
 }
 
-func setSidMode(mode int32, t0, ayanT0 float64) {
+func setSidMode(mode swego.Ayanamsa, t0, ayanT0 float64) {
 	_mode := C.int32(mode)
 	_t0 := C.double(t0)
 	_ayanT0 := C.double(ayanT0)
@@ -156,19 +156,19 @@ func _calc(jd float64, fl int32, fn _calcFunc) (xx [6]float64, cfl int, err erro
 	return
 }
 
-func calc(et float64, pl int, fl int32) ([6]float64, int, error) {
+func calc(et float64, pl swego.Planet, fl int32) ([6]float64, int, error) {
 	return _calc(et, fl, func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32 {
 		return C.swe_calc(jd, C.int(pl), fl, xx, err)
 	})
 }
 
-func calcUT(ut float64, pl int, fl int32) ([6]float64, int, error) {
+func calcUT(ut float64, pl swego.Planet, fl int32) ([6]float64, int, error) {
 	return _calc(ut, fl, func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32 {
 		return C.swe_calc_ut(jd, C.int32(pl), fl, xx, err)
 	})
 }
 
-func planetName(pl int) string {
+func planetName(pl swego.Planet) string {
 	var _name [C.AS_MAXCH]C.char
 	C.swe_get_planet_name(C.int(pl), &_name[0])
 	return C.GoString(&_name[0])

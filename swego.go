@@ -1,6 +1,15 @@
 // Package swego defines an interface for interfacing with the Swiss Ephemeris.
 package swego
 
+// CalType represents the calendar type used in julian date conversion.
+type CalType int
+
+// Planet is the type of the planet constants.
+type Planet int
+
+// HSys represents house system identifiers used in the C library.
+type HSys rune
+
 // CalcFlags represents the flags argument of swe_calc and swe_calc_ut in a
 // stateless way.
 type CalcFlags struct {
@@ -35,16 +44,13 @@ type HousesExFlags struct {
 
 // SidMode represents the arguments of swe_set_sid_mode.
 type SidMode struct {
-	Mode   int32
+	Mode   Ayanamsa
 	T0     float64
 	AyanT0 float64
 }
 
-// CalType represents the calendar type used in julian date conversion.
-type CalType int
-
-// HSys represents house system identifiers used in the C library.
-type HSys rune
+// Ayanamsa is the type of sidereal mode constants.
+type Ayanamsa int32
 
 // Interface defines a standardized way for interfacing with the Swiss
 // Ephemeris library from Go.
@@ -59,14 +65,14 @@ type Interface interface {
 
 	// Calc calculates the position and optionally the speed of planet pl at
 	// Julian Date (in Ephemeris Time) et with calculation flags fl.
-	Calc(et float64, pl int, fl CalcFlags) (xx [6]float64, cfl int, err error)
+	Calc(et float64, pl Planet, fl CalcFlags) (xx [6]float64, cfl int, err error)
 	// CalcUT calculates the position and optionally the speed of planet pl at
 	// Julian Date (in Universal Time) ut with calculation flags fl. Within the C
 	// library swe_deltat is called to convert Universal Time to Ephemeris Time.
-	CalcUT(ut float64, pl int, fl CalcFlags) (xx [6]float64, cfl int, err error)
+	CalcUT(ut float64, pl Planet, fl CalcFlags) (xx [6]float64, cfl int, err error)
 
 	// PlanetName returns the name of planet pl.
-	PlanetName(pl int) string
+	PlanetName(pl Planet) string
 
 	// GetAyanamsa returns the ayanamsa for Julian Date (in Ephemeris Time) et.
 	// You should use GetAyanamsaEx, see the Programmer's Documentation.

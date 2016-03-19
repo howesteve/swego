@@ -54,7 +54,7 @@ func TestCalc(t *testing.T) {
 	loc := swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0}
 
 	cases := []struct {
-		fn   func(float64, int, swego.CalcFlags) ([6]float64, int, error)
+		fn   func(float64, swego.Planet, swego.CalcFlags) ([6]float64, int, error)
 		in   swego.CalcFlags
 		want result
 	}{
@@ -86,7 +86,7 @@ func TestCalc(t *testing.T) {
 
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			xx, cfl, err := c.fn(2451544.5, 0, c.in)
+			xx, cfl, err := c.fn(2451544.5, swego.Sun, c.in)
 
 			if err != nil {
 				t.Errorf("err != nil, got: %q", err)
@@ -107,7 +107,7 @@ func TestCalc_error(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn  func(float64, int, swego.CalcFlags) ([6]float64, int, error)
+		fn  func(float64, swego.Planet, swego.CalcFlags) ([6]float64, int, error)
 		err string
 	}{
 		{gWrapper.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
@@ -116,7 +116,7 @@ func TestCalc_error(t *testing.T) {
 
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			xx, cfl, err := c.fn(99999999.0, 0, swego.CalcFlags{Flags: 1})
+			xx, cfl, err := c.fn(99999999.0, swego.Sun, swego.CalcFlags{Flags: 1})
 
 			if err.Error() != c.err {
 				t.Fatalf("err != %q, got: %q", err, c.err)
@@ -137,9 +137,9 @@ func TestPlanetName(t *testing.T) {
 	t.Parallel()
 
 	Call(nil, func(swe swego.Interface) {
-		name := swe.PlanetName(0)
+		name := swe.PlanetName(swego.Sun)
 		if name != "Sun" {
-			t.Error("PlanetName(0) != Sun, got:", name)
+			t.Errorf(`PlanetName(Sun) != "Sun", got: %q`, name)
 		}
 	})
 }
