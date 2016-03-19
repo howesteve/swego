@@ -2,6 +2,7 @@ package swecgo
 
 import (
 	"errors"
+	"unicode"
 	"unsafe"
 
 	"github.com/dwlnetnl/swego"
@@ -282,7 +283,7 @@ func jdUT1ToUTC(ut float64, gf int) (y, m, d, h, i int, s float64) {
 
 type _housesFunc func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int
 
-func _houses(lat float64, hsys int, fn _housesFunc) (_ []float64, ascmc [10]float64, err error) {
+func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_ []float64, ascmc [10]float64, err error) {
 	_lat := C.double(lat)
 	_hsys := C.int(hsys)
 
@@ -295,14 +296,14 @@ func _houses(lat float64, hsys int, fn _housesFunc) (_ []float64, ascmc [10]floa
 	}
 
 	n := 13
-	if hsys == swego.Gauquelin {
+	if swego.HSys(unicode.ToUpper(rune(hsys))) == swego.Gauquelin {
 		n = 37
 	}
 
 	return cusps[:n:n], ascmc, err
 }
 
-func houses(ut, lat, lng float64, hsys int) ([]float64, [10]float64, error) {
+func houses(ut, lat, lng float64, hsys swego.HSys) ([]float64, [10]float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_jd := C.double(ut)
 		_lng := C.double(lng)
@@ -310,7 +311,7 @@ func houses(ut, lat, lng float64, hsys int) ([]float64, [10]float64, error) {
 	})
 }
 
-func housesEx(ut float64, fl int32, lat, lng float64, hsys int) ([]float64, [10]float64, error) {
+func housesEx(ut float64, fl int32, lat, lng float64, hsys swego.HSys) ([]float64, [10]float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_jd := C.double(ut)
 		_fl := C.int32(fl)
@@ -319,7 +320,7 @@ func housesEx(ut float64, fl int32, lat, lng float64, hsys int) ([]float64, [10]
 	})
 }
 
-func housesArmc(armc, lat, eps float64, hsys int) ([]float64, [10]float64, error) {
+func housesArmc(armc, lat, eps float64, hsys swego.HSys) ([]float64, [10]float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_armc := C.double(armc)
 		_eps := C.double(eps)
@@ -327,7 +328,7 @@ func housesArmc(armc, lat, eps float64, hsys int) ([]float64, [10]float64, error
 	})
 }
 
-func housePos(armc, geolat, eps float64, hsys int, pllng, pllat float64) (pos float64, err error) {
+func housePos(armc, geolat, eps float64, hsys swego.HSys, pllng, pllat float64) (pos float64, err error) {
 	_armc := C.double(armc)
 	_lat := C.double(geolat)
 	_eps := C.double(eps)
@@ -342,7 +343,7 @@ func housePos(armc, geolat, eps float64, hsys int, pllng, pllat float64) (pos fl
 	return
 }
 
-func houseName(hsys int) string {
+func houseName(hsys swego.HSys) string {
 	return C.GoString(C.swe_house_name(C.int(hsys)))
 }
 

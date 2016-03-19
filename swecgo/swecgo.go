@@ -162,12 +162,12 @@ func (w *wrapper) JdUT1ToUTC(ut1 float64, ct swego.CalType) (y, m, d, h, i int, 
 }
 
 // Houses implements swego.Interface.
-func (w *wrapper) Houses(ut, geolat, geolon float64, hsys int) ([]float64, [10]float64, error) {
+func (w *wrapper) Houses(ut, geolat, geolon float64, hsys swego.HSys) ([]float64, [10]float64, error) {
 	return houses(ut, geolat, geolon, hsys)
 }
 
 // HousesEx implements swego.Interface.
-func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys int) ([]float64, [10]float64, error) {
+func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys swego.HSys) ([]float64, [10]float64, error) {
 	if (fl.Flags & flgSidereal) == flgSidereal {
 		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	}
@@ -176,17 +176,17 @@ func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon fl
 }
 
 // HousesArmc implements swego.Interface.
-func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys int) ([]float64, [10]float64, error) {
+func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys swego.HSys) ([]float64, [10]float64, error) {
 	return housesArmc(armc, geolat, eps, hsys)
 }
 
 // HousePos implements swego.Interface.
-func (w *wrapper) HousePos(armc, geolat, eps float64, hsys int, pllng, pllat float64) (float64, error) {
+func (w *wrapper) HousePos(armc, geolat, eps float64, hsys swego.HSys, pllng, pllat float64) (float64, error) {
 	return housePos(armc, geolat, eps, hsys, pllng, pllat)
 }
 
 // HouseName implements swego.Interface.
-func (w *wrapper) HouseName(hsys int) string { return houseName(hsys) }
+func (w *wrapper) HouseName(hsys swego.HSys) string { return houseName(hsys) }
 
 // DeltaT implements swego.Interface.
 func (w *wrapper) DeltaT(jd float64) float64 { return deltaT(jd) }
