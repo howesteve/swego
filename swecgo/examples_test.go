@@ -8,7 +8,7 @@ import (
 
 func ExampleCall_calcUT() {
 	Call(nil, func(swe swego.Interface) {
-		xx, cfl, err := swe.CalcUT(2451544.5, 0, swego.CalcFlags{}) // flags = 0
+		xx, cfl, err := swe.CalcUT(2451544.5, swego.Sun, swego.CalcFlags{})
 		if err != nil {
 			fmt.Println("Calculation error: ", err)
 			return

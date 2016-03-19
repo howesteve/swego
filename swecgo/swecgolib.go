@@ -3,6 +3,8 @@ package swecgo
 import (
 	"errors"
 	"unsafe"
+
+	"github.com/dwlnetnl/swego"
 )
 
 /*
@@ -293,7 +295,7 @@ func _houses(lat float64, hsys int, fn _housesFunc) (_ []float64, ascmc [10]floa
 	}
 
 	n := 13
-	if hsys == 'G' {
+	if hsys == swego.Gauquelin {
 		n = 37
 	}
 

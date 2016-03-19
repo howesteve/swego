@@ -43,12 +43,6 @@ type SidMode struct {
 // CalType represents the calendar type used in julian date conversion.
 type CalType int
 
-// Calendar types.
-const (
-	Julian    CalType = 0
-	Gregorian CalType = 1
-)
-
 // Interface defines a standardized way for interfacing with the Swiss
 // Ephemeris library from Go.
 type Interface interface {
