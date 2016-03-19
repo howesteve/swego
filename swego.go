@@ -89,7 +89,7 @@ type Interface interface {
 	// passed in fl.Flags.
 	GetAyanamsaExUT(ut float64, fl AyanamsaExFlags) (float64, error)
 	// GetAyanamsaName returns the name of sidmode.
-	GetAyanamsaName(sidmode int32) string
+	GetAyanamsaName(ayan Ayanamsa) string
 
 	// JulDay returns the corresponding Julian Date for the given date. Calendar
 	// type ct is used to clearify the year y, Julian or Gregorian.

@@ -210,8 +210,8 @@ func getAyanamsaExUT(ut float64, fl int32) (float64, error) {
 	})
 }
 
-func getAyanamsaName(sidmode int32) string {
-	return C.GoString(C.swe_get_ayanamsa_name(C.int32(sidmode)))
+func getAyanamsaName(ayan swego.Ayanamsa) string {
+	return C.GoString(C.swe_get_ayanamsa_name(C.int32(ayan)))
 }
 
 func julDay(y, m, d int, h float64, gf int) float64 {

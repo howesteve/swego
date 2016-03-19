@@ -132,8 +132,8 @@ func (w *wrapper) GetAyanamsaExUT(ut float64, fl swego.AyanamsaExFlags) (float64
 }
 
 // GetAyanamsaName implements swego.Interface.
-func (w *wrapper) GetAyanamsaName(sidmode int32) string {
-	return getAyanamsaName(sidmode)
+func (w *wrapper) GetAyanamsaName(ayan swego.Ayanamsa) string {
+	return getAyanamsaName(ayan)
 }
 
 // JulDay implements swego.Interface.
