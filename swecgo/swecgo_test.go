@@ -61,36 +61,50 @@ func TestCalc(t *testing.T) {
 		cfl int
 	}
 
-	loc := swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0}
-
 	cases := []struct {
 		fn   func(float64, swego.Planet, swego.CalcFlags) ([6]float64, int, error)
 		in   swego.CalcFlags
 		want result
 	}{
 		{gWrapper.Calc,
-			swego.CalcFlags{Flags: 1},
+			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de431.eph"},
 			result{[6]float64{279.858461, .000229, .983331}, 1}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{Flags: 1},
+			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de431.eph"},
 			result{[6]float64{279.859214, .000229, .983331}, 1}},
 		{gWrapper.Calc,
-			swego.CalcFlags{Flags: 1 | flgTopo, TopoLoc: loc},
+			swego.CalcFlags{
+				Flags:       swego.FlagEphJPL | swego.FlagTopo,
+				FileNameJPL: "de431.eph",
+				TopoLoc:     swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
+			},
 			result{[6]float64{279.858426, -.000966, .983369}, 32769}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{Flags: 1 | flgTopo, TopoLoc: loc},
+			swego.CalcFlags{
+				Flags:       swego.FlagEphJPL | swego.FlagTopo,
+				FileNameJPL: "de431.eph",
+				TopoLoc:     swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
+			},
 			result{[6]float64{279.859186, -.000966, .983369}, 32769}},
 		{gWrapper.Calc,
-			swego.CalcFlags{Flags: 1 | flgSidereal, SidMode: swego.SidMode{Mode: 0}},
+			swego.CalcFlags{
+				Flags:       swego.FlagEphJPL | swego.FlagSidereal,
+				FileNameJPL: "de431.eph",
+				SidMode:     swego.SidMode{Mode: 0},
+			},
 			result{[6]float64{255.121938, .000229, .983331}, 65601}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{Flags: 1 | flgSidereal, SidMode: swego.SidMode{Mode: 0}},
+			swego.CalcFlags{
+				Flags:       swego.FlagEphJPL | swego.FlagSidereal,
+				FileNameJPL: "de431.eph",
+				SidMode:     swego.SidMode{Mode: 0},
+			},
 			result{[6]float64{255.122691, .000229, .983331}, 65601}},
 		{gWrapper.Calc,
-			swego.CalcFlags{Flags: 1, FileNameJPL: "de406.eph"},
+			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de406.eph"},
 			result{[6]float64{279.858461, .000230, .983331}, 1}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{Flags: 1, FileNameJPL: "de406.eph"},
+			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de406.eph"},
 			result{[6]float64{279.859214, .000230, .983331}, 1}},
 	}
 
