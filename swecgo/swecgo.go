@@ -88,8 +88,10 @@ func setCalcFlagsState(fl swego.CalcFlags) {
 	}
 
 	if fl.FileNameJPL != "" {
-		setFileNameJPL(fl.FileNameJPL)
+		fl.FileNameJPL = swego.FnameDft
 	}
+
+	setFileNameJPL(fl.FileNameJPL)
 }
 
 // Calc implements swego.Interface.

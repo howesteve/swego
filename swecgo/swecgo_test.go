@@ -73,6 +73,12 @@ func TestCalc(t *testing.T) {
 			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de431.eph"},
 			result{[6]float64{279.859214, .000229, .983331}, 1}},
 		{gWrapper.Calc,
+			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de406.eph"},
+			result{[6]float64{279.858461, .000230, .983331}, 1}},
+		{gWrapper.CalcUT,
+			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de406.eph"},
+			result{[6]float64{279.859214, .000230, .983331}, 1}},
+		{gWrapper.Calc,
 			swego.CalcFlags{
 				Flags:       swego.FlagEphJPL | swego.FlagTopo,
 				FileNameJPL: "de431.eph",
@@ -100,12 +106,6 @@ func TestCalc(t *testing.T) {
 				SidMode:     swego.SidMode{Mode: 0},
 			},
 			result{[6]float64{255.122691, .000229, .983331}, 65601}},
-		{gWrapper.Calc,
-			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de406.eph"},
-			result{[6]float64{279.858461, .000230, .983331}, 1}},
-		{gWrapper.CalcUT,
-			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: "de406.eph"},
-			result{[6]float64{279.859214, .000230, .983331}, 1}},
 	}
 
 	for _, c := range cases {

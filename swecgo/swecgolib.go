@@ -58,6 +58,7 @@ int swex_supports_tls() {
 #cgo CFLAGS: -w
 
 #include <stdlib.h>
+#include <string.h>
 #include "swephexp.h"
 #include "sweph.h"
 
@@ -78,6 +79,12 @@ void swex_set_sid_mode(int32 sid_mode, double t0, double ayan_t0) {
 		|| swed.sidd.t0 != t0
 	) {
 		swe_set_sid_mode(sid_mode, t0, ayan_t0);
+	}
+}
+
+void swex_set_jpl_file(const char *fname) {
+	if (strncmp(fname, swed.jplfnam, strlen(fname)) != 0) {
+		swe_set_jpl_file(fname);
 	}
 }
 
@@ -128,7 +135,7 @@ func setSidMode(mode swego.Ayanamsa, t0, ayanT0 float64) {
 
 func setFileNameJPL(name string) {
 	_name := C.CString(name)
-	C.swe_set_jpl_file(_name)
+	C.swex_set_jpl_file(_name)
 	C.free(unsafe.Pointer(_name))
 }
 
