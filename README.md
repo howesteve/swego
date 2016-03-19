@@ -37,7 +37,7 @@ Currently the following subset of the C API is implemented:
 - [`swe_set_tid_acc`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200797) (handled internally by the C library)
 
 ### What is the deal with that _via arguments passed to method_?
-The reason is to eliminate the number of calls a user has to make. This is in contrast with the C API that requires you to call `swe_set_topo` before `swe_calc`. when you are calculating the topocentric position of Venus. Only calling a single C function is important in the context of Go because you like to minimize the number of calls to C.
+The reason is to eliminate the number of calls a user has to make. This is in contrast with the C API that requires you to call `swe_set_topo` before `swe_calc` when you for example are calculating the topocentric position of Venus. Only calling a single C function is important in the context of Go because you like to minimize the number of calls to C.
 
 Currently the implementation is smart about when to call `swe_set_topo`, but it figures this out in via a C call separate of the calculation. So here's room for improvement but this can be done without changing the public API.
 
