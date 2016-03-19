@@ -6,6 +6,7 @@ const (
 	Gregorian CalType = 1
 )
 
+// Planet, fictional body and asteroid constants.
 const (
 	Sun          = 0
 	Moon         = 1
