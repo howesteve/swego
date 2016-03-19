@@ -22,6 +22,27 @@ func inDelta(a, b []float64, delta float64) bool {
 	return true
 }
 
+func TestVersion(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got := swe.Version()
+
+		if got != Version {
+			t.Errorf("Version() != %s, got: %q", Version, got)
+		}
+	})
+}
+
+func TestClose(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		swe.Close()
+		swe.SetPath(DefaultPath)
+	})
+}
+
 func TestCalc(t *testing.T) {
 	t.Parallel()
 
@@ -393,6 +414,7 @@ func TestHousesEx(t *testing.T) {
 	type input struct {
 		geolat float64
 		hsys   int
+		flags  swego.HousesExFlags
 	}
 
 	type result struct {
@@ -405,7 +427,7 @@ func TestHousesEx(t *testing.T) {
 		in   input
 		want result
 	}{
-		{input{52.083333, 'P'}, result{
+		{input{52.083333, 'P', swego.HousesExFlags{}}, result{
 			[]float64{0,
 				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
 				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
@@ -416,7 +438,7 @@ func TestHousesEx(t *testing.T) {
 			},
 			"",
 		}},
-		{input{82.083333, 'K'}, result{
+		{input{82.083333, 'K', swego.HousesExFlags{}}, result{
 			[]float64{0,
 				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
 				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
@@ -427,7 +449,7 @@ func TestHousesEx(t *testing.T) {
 			},
 			"swecgo: error calculating houses",
 		}},
-		{input{52.083333, 'G'}, result{
+		{input{52.083333, 'G', swego.HousesExFlags{}}, result{
 			[]float64{0,
 				190.553653, 183.704634, 176.258623, 168.152982, 159.330891, 149.746713,
 				139.373115, 128.213369, 116.328153, 103.886819, 91.215325, 78.741976,
@@ -442,12 +464,27 @@ func TestHousesEx(t *testing.T) {
 			},
 			"",
 		}},
+		{input{52.083333, 'P', swego.HousesExFlags{
+			Flags:   flgSidereal,
+			SidMode: swego.SidMode{Mode: 0},
+		}},
+			result{
+				[]float64{0,
+					165.817130, 190.801765, 222.086464, 259.150296, 294.636593, 323.416459,
+					345.817130, 10.801765, 42.086464, 79.150296, 114.636593, 143.416459,
+				},
+				[10]float64{
+					165.817130, 79.150296, 105.080915, 359.569965,
+					171.630740, 189.998138, 167.539394, 9.998138,
+				},
+				"",
+			}},
 	}
 
 	for _, c := range cases {
 		Call(nil, func(swe swego.Interface) {
-			cusps, ascmc, err := swe.HousesEx(2451544.5, swego.HousesExFlags{},
-				c.in.geolat, 5.116667, c.in.hsys)
+			cusps, ascmc, err := swe.HousesEx(2451544.5, c.in.flags, c.in.geolat,
+				5.116667, c.in.hsys)
 
 			if c.want.err != "" && c.want.err != err.Error() {
 				t.Fatalf("(%f, %c) err != %q, got: %q",
