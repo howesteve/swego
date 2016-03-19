@@ -14,8 +14,8 @@ import (
 // documentation about swe_set_ephe_path.
 //
 // In non-TLS-mode only a single fn can be executed at a single time. This is
-// achieved by a single mutex that is locked before a fn is called and unlocked
-// after fn has been executed.
+// achieved by sending fn over a channel to a separate goroutine that executes
+// all closures it receives and blocks waiting until fn is done executing.
 //
 // TLS-mode (Thread Local Storage) is currently not implemented.
 func Call(init func(swe swego.Interface), fn func(swe swego.Interface)) {
