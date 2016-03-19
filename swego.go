@@ -72,9 +72,9 @@ type Interface interface {
 	PlanetName(pl int) string
 
 	// GetAyanamsa returns the ayanamsa for Julian Date (in Ephemeris Time) et.
-	GetAyanamsa(et float64) float64
+	GetAyanamsa(et float64, sidmode SidMode) float64
 	// GetAyanamsaUT returns the ayanamsa for Julian Date (in Universal Time) ut.
-	GetAyanamsaUT(ut float64) float64
+	GetAyanamsaUT(ut float64, sidmode SidMode) float64
 	// GetAyanamsaEx returns the ayanamsa for Julian Date (in Ephemeris Time) et.
 	// It is equal to GetAyanamsa but uses the ΔT consistent with the ephemeris
 	// passed in fl.Flags.

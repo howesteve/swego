@@ -108,26 +108,26 @@ func (w *wrapper) CalcUT(ut float64, pl int, fl swego.CalcFlags) ([6]float64, in
 func (w *wrapper) PlanetName(pl int) string { return planetName(pl) }
 
 // GetAyanamsa implements swego.Interface.
-func (w *wrapper) GetAyanamsa(et float64) float64 { return getAyanamsa(et) }
+func (w *wrapper) GetAyanamsa(et float64, sidmode swego.SidMode) float64 {
+	setSidMode(sidmode.Mode, sidmode.T0, sidmode.AyanT0)
+	return getAyanamsa(et)
+}
 
 // GetAyanamsaUT implements swego.Interface.
-func (w *wrapper) GetAyanamsaUT(ut float64) float64 { return getAyanamsaUT(ut) }
-
-func setAyanamsaExFlagsState(fl swego.AyanamsaExFlags) {
-	if (fl.Flags & flgSidereal) == flgSidereal {
-		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
-	}
+func (w *wrapper) GetAyanamsaUT(ut float64, sidmode swego.SidMode) float64 {
+	setSidMode(sidmode.Mode, sidmode.T0, sidmode.AyanT0)
+	return getAyanamsaUT(ut)
 }
 
 // GetAyanamsaEx implements swego.Interface.
 func (w *wrapper) GetAyanamsaEx(et float64, fl swego.AyanamsaExFlags) (float64, error) {
-	setAyanamsaExFlagsState(fl)
+	setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	return getAyanamsaEx(et, fl.Flags)
 }
 
 // GetAyanamsaExUT implements swego.Interface.
 func (w *wrapper) GetAyanamsaExUT(ut float64, fl swego.AyanamsaExFlags) (float64, error) {
-	setAyanamsaExFlagsState(fl)
+	setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	return getAyanamsaExUT(ut, fl.Flags)
 }
 

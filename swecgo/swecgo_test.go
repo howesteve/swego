@@ -49,6 +49,18 @@ func TestCalc(t *testing.T) {
 		{gWrapper.CalcUT,
 			swego.CalcFlags{Flags: 1 | flgTopo, TopoLoc: loc},
 			result{[6]float64{279.859186, -.000966, .983369}, 32769}},
+		{gWrapper.Calc,
+			swego.CalcFlags{Flags: 1 | flgSidereal, SidMode: swego.SidMode{Mode: 0}},
+			result{[6]float64{255.121938, .000229, .983331}, 65601}},
+		{gWrapper.CalcUT,
+			swego.CalcFlags{Flags: 1 | flgSidereal, SidMode: swego.SidMode{Mode: 0}},
+			result{[6]float64{255.122691, .000229, .983331}, 65601}},
+		{gWrapper.Calc,
+			swego.CalcFlags{Flags: 1, FileNameJPL: "de406.eph"},
+			result{[6]float64{279.858461, .000230, .983331}, 1}},
+		{gWrapper.CalcUT,
+			swego.CalcFlags{Flags: 1, FileNameJPL: "de406.eph"},
+			result{[6]float64{279.859214, .000230, .983331}, 1}},
 	}
 
 	for _, c := range cases {
@@ -115,7 +127,7 @@ func TestGetAyanamsa(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn   func(float64) float64
+		fn   func(float64, swego.SidMode) float64
 		want float64
 	}{
 		{gWrapper.GetAyanamsa, 24.740393},
@@ -124,7 +136,7 @@ func TestGetAyanamsa(t *testing.T) {
 
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			got := c.fn(2451544.5)
+			got := c.fn(2451544.5, swego.SidMode{Mode: 0})
 
 			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
 				t.Errorf("deltaT != %f, got: %f", c.want, got)
@@ -582,6 +594,34 @@ func TestHouseName(t *testing.T) {
 
 		if name != "Placidus" {
 			t.Error("HouseName('P') != Placidus, got:", name)
+		}
+	})
+}
+
+func TestDeltaT(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got := swe.DeltaT(2451544.5)
+
+		if !inDelta([]float64{got}, []float64{0.000739}, 1e-6) {
+			t.Errorf("DeltaT(2451544.5) != 0.000739, got: %f", got)
+		}
+	})
+}
+
+func TestDeltaTEx(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		got, err := swe.DeltaTEx(2451544.5, 2)
+
+		if err != nil {
+			t.Fatalf("err != nil, got: %q", err)
+		}
+
+		if !inDelta([]float64{got}, []float64{0.000739}, 1e-6) {
+			t.Errorf("DeltaTEx(2451544.5, 2) != 0.000739, got: %f", got)
 		}
 	})
 }
