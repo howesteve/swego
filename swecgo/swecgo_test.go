@@ -22,7 +22,7 @@ func inDelta(a, b []float64, delta float64) bool {
 	return true
 }
 
-func TestFlagConstCheck(t *testing.T) {
+func TestConstantCheck(t *testing.T) {
 	if flgSidereal != swego.FlagSidereal {
 		t.Errorf("Sidereal: want %d, got: %d", flgSidereal, swego.FlagSidereal)
 	}
@@ -136,10 +136,14 @@ func TestCalc_error(t *testing.T) {
 
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			xx, cfl, err := c.fn(99999999.0, swego.Sun, swego.CalcFlags{Flags: 1})
+			xx, cfl, err := c.fn(99999999., swego.Sun, swego.CalcFlags{Flags: swego.FlagEphJPL})
+
+			if err == nil {
+				t.Fatal("err == nil")
+			}
 
 			if err.Error() != c.err {
-				t.Fatalf("err != %q, got: %q", err, c.err)
+				t.Errorf("err != %q, got: %q", err, c.err)
 			}
 
 			if xx != ([6]float64{}) {
@@ -148,6 +152,113 @@ func TestCalc_error(t *testing.T) {
 
 			if cfl != -1 {
 				t.Error("xx != -1, got:", cfl)
+			}
+		})
+	}
+}
+
+func TestNodAps(t *testing.T) {
+	t.Parallel()
+
+	type result struct {
+		nasc, ndsc, peri, aphe [6]float64
+	}
+
+	cases := []struct {
+		fn   func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
+		in   swego.NodApsMethod
+		want result
+	}{
+		{gWrapper.NodAps, swego.NodbitMean, result{
+			[6]float64{125.067162, .0, .002461},
+			[6]float64{305.067162, .0, .002671},
+			[6]float64{83.408587, -3.425232, .002428},
+			[6]float64{263.408587, 3.425232, .002710},
+		}},
+		{gWrapper.NodApsUT, swego.NodbitMean, result{
+			[6]float64{125.067123, .0, .002461},
+			[6]float64{305.067123, .0, .002671},
+			[6]float64{83.408669, -3.425224, .002428},
+			[6]float64{263.408669, 3.425224, .002710},
+		}},
+		{gWrapper.NodAps, swego.NodbitMean | swego.NodbitFoPoint, result{
+			[6]float64{125.067162, .0, .002461},
+			[6]float64{305.067162, .0, .002671},
+			[6]float64{83.408587, -3.425232, .002428},
+			[6]float64{263.408587, 3.425232, .000282}, // different
+		}},
+		{gWrapper.NodApsUT, swego.NodbitMean | swego.NodbitFoPoint, result{
+			[6]float64{125.067123, .0, .002461},
+			[6]float64{305.067123, .0, .002671},
+			[6]float64{83.408669, -3.425224, .002428},
+			[6]float64{263.408669, 3.425224, .000282}, // different
+		}},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(_ swego.Interface) {
+			nasc, ndsc, peri, aphe, err := c.fn(2451544.5, swego.Moon, swego.CalcFlags{Flags: swego.FlagEphJPL}, c.in)
+
+			if err != nil {
+				t.Errorf("err != nil, got: %q", err)
+			}
+
+			if !inDelta(nasc[:], c.want.nasc[:], 1e-6) {
+				t.Errorf("nasc != %v ± 1e-6, got: %v", c.want.nasc, nasc)
+			}
+
+			if !inDelta(ndsc[:], c.want.ndsc[:], 1e-6) {
+				t.Errorf("ndsc != %v ± 1e-6, got: %v", c.want.ndsc, ndsc)
+			}
+
+			if !inDelta(peri[:], c.want.peri[:], 1e-6) {
+				t.Errorf("peri != %v ± 1e-6, got: %v", c.want.peri, peri)
+			}
+
+			if !inDelta(aphe[:], c.want.aphe[:], 1e-6) {
+				t.Errorf("aphe != %v ± 1e-6, got: %v", c.want.aphe, aphe)
+			}
+		})
+	}
+}
+
+func TestNodAps_error(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		fn  func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
+		err string
+	}{
+		{gWrapper.NodAps, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{gWrapper.NodApsUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+	}
+
+	for _, c := range cases {
+		Call(nil, func(_ swego.Interface) {
+			nasc, ndsc, peri, aphe, err := c.fn(99999999., swego.Moon, swego.CalcFlags{Flags: swego.FlagEphJPL}, swego.NodbitMean)
+
+			if err == nil {
+				t.Fatal("err == nil")
+			}
+
+			if err.Error() != c.err {
+				t.Errorf("err != %q, got: %q", err, c.err)
+			}
+
+			if nasc != ([6]float64{}) {
+				t.Error("nasc != [6]float{}, got:", nasc)
+			}
+
+			if ndsc != ([6]float64{}) {
+				t.Error("ndsc != [6]float{}, got:", ndsc)
+			}
+
+			if peri != ([6]float64{}) {
+				t.Error("peri != [6]float{}, got:", peri)
+			}
+
+			if aphe != ([6]float64{}) {
+				t.Error("aphe != [6]float{}, got:", aphe)
 			}
 		})
 	}

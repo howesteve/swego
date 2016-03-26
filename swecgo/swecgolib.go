@@ -175,6 +175,38 @@ func calcUT(ut float64, pl swego.Planet, fl int32) ([6]float64, int, error) {
 	})
 }
 
+type _nodApsFunc func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32
+
+func _nodAps(jd float64, pl swego.Planet, fl int32, m swego.NodApsMethod, fn _nodApsFunc) (nasc, ndsc, peri, aphe [6]float64, err error) {
+	_jd := C.double(jd)
+	_pl := C.int32(pl)
+	_fl := C.int32(fl)
+	_m := C.int32(m)
+	_nasc := (*C.double)(unsafe.Pointer(&nasc[0]))
+	_ndsc := (*C.double)(unsafe.Pointer(&ndsc[0]))
+	_peri := (*C.double)(unsafe.Pointer(&peri[0]))
+	_aphe := (*C.double)(unsafe.Pointer(&aphe[0]))
+
+	err = withError(func(err *C.char) bool {
+		rc := int(fn(_jd, _pl, _fl, _m, _nasc, _ndsc, _peri, _aphe, err))
+		return rc == C.ERR
+	})
+
+	return
+}
+
+func nodAps(et float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+	return _nodAps(et, pl, fl, m, func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32 {
+		return C.swe_nod_aps(jd, pl, fl, m, nasc, ndsc, peri, aphe, err)
+	})
+}
+
+func nodApsUT(ut float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+	return _nodAps(ut, pl, fl, m, func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32 {
+		return C.swe_nod_aps_ut(jd, pl, fl, m, nasc, ndsc, peri, aphe, err)
+	})
+}
+
 func planetName(pl swego.Planet) string {
 	var _name [C.AS_MAXCH]C.char
 	C.swe_get_planet_name(C.int(pl), &_name[0])
@@ -198,7 +230,6 @@ func _getAyanamsaEx(jd float64, fl int32, fn _getAyanamsaExFunc) (aya float64, e
 
 	err = withError(func(err *C.char) bool {
 		rc := int(fn(_jd, _fl, _aya, err))
-		// rc := int(C.swe_get_ayanamsa_ex(_jd, _fl, _aya, err))
 		return rc == C.ERR
 	})
 

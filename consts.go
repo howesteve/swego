@@ -130,13 +130,13 @@ const (
 	SidmUser               Ayanamsa = 255
 )
 
-// // Nodes and apsides calculation bits defined in swephexp.h.
-// const (
-// 	NodBitMean       = 1
-// 	NodBitOscu       = 2
-// 	NodBitOscuBary   = 4
-// 	NodBitFocalPoint = 256
-// )
+// Nodes and apsides calculation bits defined in swephexp.h.
+const (
+	NodbitMean     NodApsMethod = 1
+	NodbitOscu     NodApsMethod = 2
+	NodbitOscuBary NodApsMethod = 4
+	NodbitFoPoint  NodApsMethod = 256
+)
 
 // File name of JPL data files defined in swephexp.h.
 const (

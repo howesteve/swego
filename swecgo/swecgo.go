@@ -10,12 +10,12 @@ import (
 
 // Call calls fn within an initialized execution context. The initialization of
 // this context is done by calling init. If init is nil, the default data path
-// is set, the value of DefaultPath. For more information see the/ Programmer's
+// is set, the value of DefaultPath. For more information see the Programmer's
 // documentation about swe_set_ephe_path.
 //
-// In non-TLS-mode only a single fn can be executed at a single time. This is
+// In non-TLS-mode only a single fn can be executed at any point time. This is
 // achieved by sending fn over a channel to a separate goroutine that executes
-// all closures it receives and blocks waiting until fn is done executing.
+// all closures it receives and Call blocks waiting until fn is done executing.
 //
 // TLS-mode (Thread Local Storage) is currently not implemented.
 func Call(init func(swe swego.Interface), fn func(swe swego.Interface)) {
@@ -104,6 +104,18 @@ func (w *wrapper) Calc(et float64, pl swego.Planet, fl swego.CalcFlags) ([6]floa
 func (w *wrapper) CalcUT(ut float64, pl swego.Planet, fl swego.CalcFlags) ([6]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calcUT(ut, pl, fl.Flags)
+}
+
+// NodAps implements swego.Interface.
+func (w *wrapper) NodAps(et float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+	setCalcFlagsState(fl)
+	return nodAps(et, pl, fl.Flags, m)
+}
+
+// NodApsUT implements swego.Interface.
+func (w *wrapper) NodApsUT(ut float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+	setCalcFlagsState(fl)
+	return nodApsUT(ut, pl, fl.Flags, m)
 }
 
 // PlanetName implements swego.Interface.

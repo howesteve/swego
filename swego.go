@@ -4,8 +4,11 @@ package swego
 // CalType represents the calendar type used in julian date conversion.
 type CalType int
 
-// Planet is the type of the planet constants.
+// Planet is the type of planet constants.
 type Planet int
+
+// NodApsMethod is the type of nodbit constants.
+type NodApsMethod int32
 
 // HSys represents house system identifiers used in the C library.
 type HSys rune
@@ -59,17 +62,29 @@ type Interface interface {
 	Version() string
 
 	// SetPath sets the ephemeris data path.
-	SetPath(ephepath string)
+	SetPath(path string)
 	// Close closes the Swiss Ephemeris library.
 	Close()
 
-	// Calc calculates the position and optionally the speed of planet pl at
-	// Julian Date (in Ephemeris Time) et with calculation flags fl.
+	// Calc computes the position and optionally the speed of planet pl at Julian
+	// Date (in Ephemeris Time) et with calculation flags fl.
 	Calc(et float64, pl Planet, fl CalcFlags) (xx [6]float64, cfl int, err error)
-	// CalcUT calculates the position and optionally the speed of planet pl at
+	// CalcUT computes the position and optionally the speed of planet pl at
 	// Julian Date (in Universal Time) ut with calculation flags fl. Within the C
 	// library swe_deltat is called to convert Universal Time to Ephemeris Time.
 	CalcUT(ut float64, pl Planet, fl CalcFlags) (xx [6]float64, cfl int, err error)
+
+	// NodAps computes the positions of planetary nodes and apsides (perihelia,
+	// aphelia, second focal points of the orbital ellipses) for planet pl at
+	// Julian Date (in Ephemeris Time) et with calculation flags fl using method
+	// m.
+	NodAps(et float64, pl Planet, fl CalcFlags, m NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
+	// NodApsUT computes the positions of planetary nodes and apsides (perihelia,
+	// aphelia, second focal points of the orbital ellipses) for planet pl at
+	// Julian Date (in Ephemeris Time) et with calculation flags fl using method
+	// m. Within the C library swe_deltat is called to convert Universal Time to
+	// Ephemeris Time.
+	NodApsUT(ut float64, pl Planet, fl CalcFlags, m NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
 
 	// PlanetName returns the name of planet pl.
 	PlanetName(pl Planet) string
