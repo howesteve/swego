@@ -71,6 +71,14 @@ const (
 	PolAsc = 7 // "polar ascendant" (M. Munkasey)
 )
 
+// Ephemerides that are implemented in the C library.
+const (
+	JPL        Ephemeris = FlagEphJPL
+	Swiss      Ephemeris = FlagEphSwiss
+	Moshier    Ephemeris = FlagEphMoshier
+	DefaultEph Ephemeris = FlagEphDefault
+)
+
 // Calculation flags defined in swephexp.h.
 const (
 	FlagEphJPL       = 1 << 0

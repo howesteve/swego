@@ -206,8 +206,8 @@ func (w *wrapper) HouseName(hsys swego.HSys) string { return houseName(hsys) }
 func (w *wrapper) DeltaT(jd float64) float64 { return deltaT(jd) }
 
 // DeltaTEx implements swego.Interface.
-func (w *wrapper) DeltaTEx(jd float64, fl int32) (float64, error) {
-	return deltaTEx(jd, fl)
+func (w *wrapper) DeltaTEx(jd float64, eph swego.Ephemeris) (float64, error) {
+	return deltaTEx(jd, int32(eph))
 }
 
 // TimeEqu implements swego.Interface.

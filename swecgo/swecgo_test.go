@@ -797,14 +797,14 @@ func TestDeltaTEx(t *testing.T) {
 	t.Parallel()
 
 	Call(nil, func(swe swego.Interface) {
-		got, err := swe.DeltaTEx(2451544.5, 2)
+		got, err := swe.DeltaTEx(2451544.5, swego.Swiss)
 
 		if err != nil {
 			t.Fatalf("err != nil, got: %q", err)
 		}
 
 		if !inDelta([]float64{got}, []float64{0.000739}, 1e-6) {
-			t.Errorf("DeltaTEx(2451544.5, 2) != 0.000739, got: %f", got)
+			t.Errorf("DeltaTEx(2451544.5, Swiss) != 0.000739, got: %f", got)
 		}
 	})
 }

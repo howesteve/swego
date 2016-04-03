@@ -24,6 +24,12 @@ type CalcFlags struct {
 	FileNameJPL string
 }
 
+// Ephemeris represents an ephemeris implemented in the C library.
+type Ephemeris int32
+
+// SetEphemeris sets the ephemeris flag in fl.
+func (fl CalcFlags) SetEphemeris(eph Ephemeris) { fl.Flags |= int32(eph) }
+
 // TopoLoc represents the arguments to swe_set_topo.
 type TopoLoc struct {
 	Lat  float64
@@ -151,7 +157,7 @@ type Interface interface {
 	// the Programmer's Documentation.
 	DeltaT(jd float64) float64
 	// DeltaTEx returns the ΔT for the Julian Date jd.
-	DeltaTEx(jd float64, fl int32) (float64, error)
+	DeltaTEx(jd float64, eph Ephemeris) (float64, error)
 
 	// TimeEqu returns the difference between local apparent and local mean time
 	// in days for the given Julian Date (in Universal Time).
