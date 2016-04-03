@@ -18,10 +18,14 @@ import (
 // all closures it receives and Call blocks waiting until fn is done executing.
 //
 // TLS-mode (Thread Local Storage) is currently not implemented.
-func Call(init func(swe swego.Interface), fn func(swe swego.Interface)) {
+func Call(init func(swego.Interface), fn func(swego.Interface)) {
+	initWrapper(init)
+	gWrapper.execute(fn)
 	// In TLS-mode fn would be called on a single thread in a pool of locked OS
 	// threads. For more information about this see runtime.LockOSThread.
+}
 
+func initWrapper(init func(swego.Interface)) {
 	gWrapper.once.Do(func() {
 		if supportsTLS() {
 			panic("Swiss Ephemeris library with Thread Local Storage enabled " +
@@ -38,8 +42,6 @@ func Call(init func(swe swego.Interface), fn func(swe swego.Interface)) {
 		go gWrapper.runLoop()
 		gWrapper.execute(init)
 	})
-
-	gWrapper.execute(fn)
 }
 
 var gWrapper = new(wrapper)
