@@ -176,3 +176,8 @@ type Interface interface {
 	// medidian, measured in hours.
 	SidTime(ut float64) float64
 }
+
+// An Invoker invokes a function in an initialized execution context.
+type Invoker interface {
+	Invoke(fn func(Interface))
+}

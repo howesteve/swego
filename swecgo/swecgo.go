@@ -10,8 +10,8 @@ import (
 
 // Call calls fn within an initialized execution context. The initialization of
 // this context is done by calling init. If init is nil, the default data path
-// is set, the value of DefaultPath. For more information see the Programmer's
-// documentation about swe_set_ephe_path.
+// is set to DefaultPath. For more information see the Programmer's
+// Documentation about swe_set_ephe_path.
 //
 // In non-TLS-mode only a single fn can be executed at any point time. This is
 // achieved by sending fn over a channel to a separate goroutine that executes
@@ -23,6 +23,26 @@ func Call(init func(swego.Interface), fn func(swego.Interface)) {
 	gWrapper.execute(fn)
 	// In TLS-mode fn would be called on a single thread in a pool of locked OS
 	// threads. For more information about this see runtime.LockOSThread.
+}
+
+// NewInvoker initializes an execution context and returns it.
+// If init is nil, the default data path is set to DefaultPath. For more
+// information see the Programmer's Documentation about swe_set_ephe_path.
+func NewInvoker(init func(swego.Interface)) swego.Invoker {
+	initWrapper(init)
+	return gWrapper
+}
+
+// Invoke implements swego.Invoker.
+func (w *wrapper) Invoke(fn func(swego.Interface)) { w.execute(fn) }
+
+// ----------
+
+var gWrapper = new(wrapper)
+
+type wrapper struct {
+	once sync.Once
+	fnCh chan func()
 }
 
 func initWrapper(init func(swego.Interface)) {
@@ -44,13 +64,6 @@ func initWrapper(init func(swego.Interface)) {
 	})
 }
 
-var gWrapper = new(wrapper)
-
-type wrapper struct {
-	once sync.Once
-	fnCh chan func()
-}
-
 func (w *wrapper) runLoop() {
 	runtime.LockOSThread()
 
@@ -70,6 +83,8 @@ func (w *wrapper) execute(fn func(swego.Interface)) {
 
 	wg.Wait()
 }
+
+// ----------
 
 // Version implements swego.Interface.
 func (w *wrapper) Version() string { return Version }

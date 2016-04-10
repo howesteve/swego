@@ -32,6 +32,19 @@ func TestConstantCheck(t *testing.T) {
 	}
 }
 
+func TestInvoker(t *testing.T) {
+	inv := NewInvoker(nil)
+
+	invoked := false
+	inv.Invoke(func(swe swego.Interface) {
+		invoked = true
+	})
+
+	if !invoked {
+		t.Error("closure is not invoked")
+	}
+}
+
 func TestVersion(t *testing.T) {
 	t.Parallel()
 
