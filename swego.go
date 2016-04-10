@@ -32,8 +32,8 @@ func (fl CalcFlags) SetEphemeris(eph Ephemeris) { fl.Flags |= int32(eph) }
 
 // TopoLoc represents the arguments to swe_set_topo.
 type TopoLoc struct {
-	Lat  float64
 	Long float64
+	Lat  float64
 	Alt  float64
 }
 
