@@ -11,7 +11,7 @@ type Planet int
 type NodApsMethod int32
 
 // HSys represents house system identifiers used in the C library.
-type HSys rune
+type HSys byte
 
 // CalcFlags represents the flags argument of swe_calc and swe_calc_ut in a
 // stateless way.
