@@ -1,6 +1,8 @@
 // Package swego defines an interface for interfacing with the Swiss Ephemeris.
 package swego
 
+import "unicode"
+
 // CalType represents the calendar type used in julian date conversion.
 type CalType int
 
@@ -12,6 +14,19 @@ type NodApsMethod int32
 
 // HSys represents house system identifiers used in the C library.
 type HSys byte
+
+// NewHSys validates the input and returns a HSys value if valid.
+func NewHSys(char byte) (hsys HSys, ok bool) {
+	char = byte(unicode.ToUpper(rune(char))) // unicode operate on runes
+
+	switch char {
+	case 'A', 'B', 'C', 'E', 'G', 'H', 'K', 'M', 'O',
+		'P', 'R', 'T', 'U', 'V', 'W', 'X', 'Y':
+		return HSys(char), true
+	default:
+		return '\000', false
+	}
+}
 
 // CalcFlags represents the flags argument of swe_calc and swe_calc_ut in a
 // stateless way.
