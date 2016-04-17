@@ -28,7 +28,7 @@ type CalcFlags struct {
 type Ephemeris int32
 
 // SetEphemeris sets the ephemeris flag in fl.
-func (fl CalcFlags) SetEphemeris(eph Ephemeris) { fl.Flags |= int32(eph) }
+func (fl *CalcFlags) SetEphemeris(eph Ephemeris) { fl.Flags |= int32(eph) }
 
 // TopoLoc represents the arguments to swe_set_topo.
 type TopoLoc struct {
