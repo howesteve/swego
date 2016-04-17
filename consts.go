@@ -158,7 +158,7 @@ const (
 // House systems implemented in the C library.
 const (
 	Equal                HSys = 'E' // also 'A'
-	Alcabitus            HSys = 'B'
+	Alcabitius           HSys = 'B'
 	Campanus             HSys = 'C'
 	Gauquelin            HSys = 'G'
 	Azimuthal            HSys = 'H'
