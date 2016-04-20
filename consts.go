@@ -59,6 +59,8 @@ const (
 	AstOffset = 10000
 )
 
+//go:generate stringer -type=Planet
+
 // Indexes of related house positions defined in swephexp.h.
 const (
 	Asc    = 0
