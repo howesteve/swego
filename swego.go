@@ -194,5 +194,5 @@ type Interface interface {
 
 // An Invoker invokes a function in an initialized execution context.
 type Invoker interface {
-	Invoke(fn func(Interface))
+	Invoke(fn func(Interface)) error
 }

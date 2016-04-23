@@ -33,8 +33,11 @@ func NewInvoker(init func(swego.Interface)) swego.Invoker {
 	return gWrapper
 }
 
-// Invoke implements swego.Invoker.
-func (w *wrapper) Invoke(fn func(swego.Interface)) { w.execute(fn) }
+// Invoke implements interface swego.Invoker.
+func (w *wrapper) Invoke(fn func(swego.Interface)) error {
+	w.execute(fn)
+	return nil
+}
 
 // ----------
 
