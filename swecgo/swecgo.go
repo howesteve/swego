@@ -1,3 +1,5 @@
+// +build linux,cgo darwin,cgo
+
 // Package swecgo embeds the Swiss Ephemeris library using cgo.
 package swecgo
 
