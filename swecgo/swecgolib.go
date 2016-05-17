@@ -4,7 +4,6 @@ package swecgo
 
 import (
 	"errors"
-	"unicode"
 	"unsafe"
 
 	"github.com/dwlnetnl/swego"
@@ -336,7 +335,7 @@ func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_ []float64, ascmc [
 	}
 
 	n := 13
-	if swego.HSys(unicode.ToUpper(rune(hsys))) == swego.Gauquelin {
+	if hsys == swego.Gauquelin {
 		n = 37
 	}
 

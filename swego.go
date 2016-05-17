@@ -13,11 +13,12 @@ type Planet int
 type NodApsMethod int32
 
 // HSys represents house system identifiers used in the C library.
+// It's assumed to be an upper case ASCII letter.
 type HSys byte
 
 // NewHSys validates the input and returns a HSys value if valid.
 func NewHSys(char byte) (hsys HSys, ok bool) {
-	char = byte(unicode.ToUpper(rune(char))) // unicode operate on runes
+	char = byte(unicode.ToUpper(rune(char))) // package unicode operates on runes
 
 	switch char {
 	case 'A', 'B', 'C', 'E', 'G', 'H', 'K', 'M', 'O',
