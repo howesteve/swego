@@ -393,6 +393,30 @@ func TestRevJul(t *testing.T) {
 	})
 }
 
+func TestRevJul_bce(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		y, m, d, h := swe.RevJul(990574.5, swego.Gregorian)
+
+		if y != -2000 {
+			t.Errorf("y != -2000, got: %d", y)
+		}
+
+		if m != 1 {
+			t.Errorf("m != 1, got: %d", m)
+		}
+
+		if d != 1 {
+			t.Errorf("d != 1, got: %d", d)
+		}
+
+		if h != 0 {
+			t.Errorf("h != 0, got: %f", h)
+		}
+	})
+}
+
 func TestUTCToJD(t *testing.T) {
 	t.Parallel()
 

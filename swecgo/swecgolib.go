@@ -279,11 +279,15 @@ func julDay(y, m, d int, h float64, gf int) float64 {
 func revJul(jd float64, gf int) (y, m, d int, h float64) {
 	_jd := C.double(jd)
 	_gf := C.int(gf)
-	_y := (*C.int)(unsafe.Pointer(&y))
-	_m := (*C.int)(unsafe.Pointer(&m))
-	_d := (*C.int)(unsafe.Pointer(&d))
-	_h := (*C.double)(unsafe.Pointer(&h))
-	C.swe_revjul(_jd, _gf, _y, _m, _d, _h)
+	var _y, _m, _d C.int
+	var _h C.double
+
+	C.swe_revjul(_jd, _gf, &_y, &_m, &_d, &_h)
+
+	y = int(_y)
+	m = int(_m)
+	d = int(_d)
+	h = float64(_h)
 	return
 }
 
@@ -312,13 +316,17 @@ type _jdToUTCFunc func(jd C.double, gf C.int32, y, m, d, h, i *C.int32, s *C.dou
 func _jdToUTC(jd float64, gf int, fn _jdToUTCFunc) (y, m, d, h, i int, s float64) {
 	_jd := C.double(jd)
 	_gf := C.int32(gf)
-	_y := (*C.int32)(unsafe.Pointer(&y))
-	_m := (*C.int32)(unsafe.Pointer(&m))
-	_d := (*C.int32)(unsafe.Pointer(&d))
-	_h := (*C.int32)(unsafe.Pointer(&h))
-	_i := (*C.int32)(unsafe.Pointer(&i))
-	_s := (*C.double)(unsafe.Pointer(&s))
-	fn(_jd, _gf, _y, _m, _d, _h, _i, _s)
+	var _y, _m, _d, _h, _i C.int32
+	var _s C.double
+
+	fn(_jd, _gf, &_y, &_m, &_d, &_h, &_i, &_s)
+
+	y = int(_y)
+	m = int(_m)
+	d = int(_d)
+	h = int(_h)
+	i = int(_i)
+	s = float64(_s)
 	return
 }
 
@@ -420,13 +428,14 @@ func deltaTEx(jd float64, eph int32) (deltaT float64, err error) {
 }
 
 func timeEqu(jd float64) (E float64, err error) {
-	_E := (*C.double)(unsafe.Pointer(&E))
+	var _E C.double
 
 	err = withError(func(err *C.char) bool {
-		rc := int(C.swe_time_equ(C.double(jd), _E, err))
+		rc := int(C.swe_time_equ(C.double(jd), &_E, err))
 		return rc == C.ERR
 	})
 
+	E = float64(_E)
 	return
 }
 
@@ -435,13 +444,14 @@ type _convertLMTLATFunc func(from, lng C.double, to *C.double, err *C.char) C.in
 func _convertLMTLAT(from, geolon float64, fn _convertLMTLATFunc) (to float64, err error) {
 	_from := C.double(from)
 	_lng := C.double(geolon)
-	_to := (*C.double)(unsafe.Pointer(&to))
+	var _to C.double
 
 	err = withError(func(err *C.char) bool {
-		rc := int(fn(_from, _lng, _to, err))
+		rc := int(fn(_from, _lng, &_to, err))
 		return rc == C.ERR
 	})
 
+	to = float64(_to)
 	return
 }
 
