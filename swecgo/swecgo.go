@@ -50,6 +50,8 @@ type wrapper struct {
 	fnCh chan func()
 }
 
+var _ swego.Interface = (*wrapper)(nil) // assert interface
+
 func initWrapper(init func(swego.Interface)) {
 	gWrapper.once.Do(func() {
 		if supportsTLS() {
@@ -117,25 +119,25 @@ func setCalcFlagsState(fl swego.CalcFlags) {
 }
 
 // Calc implements swego.Interface.
-func (w *wrapper) Calc(et float64, pl swego.Planet, fl swego.CalcFlags) ([6]float64, int, error) {
+func (w *wrapper) Calc(et float64, pl swego.Planet, fl swego.CalcFlags) ([]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calc(et, pl, fl.Flags)
 }
 
 // CalcUT implements swego.Interface.
-func (w *wrapper) CalcUT(ut float64, pl swego.Planet, fl swego.CalcFlags) ([6]float64, int, error) {
+func (w *wrapper) CalcUT(ut float64, pl swego.Planet, fl swego.CalcFlags) ([]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calcUT(ut, pl, fl.Flags)
 }
 
 // NodAps implements swego.Interface.
-func (w *wrapper) NodAps(et float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+func (w *wrapper) NodAps(et float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
 	setCalcFlagsState(fl)
 	return nodAps(et, pl, fl.Flags, m)
 }
 
 // NodApsUT implements swego.Interface.
-func (w *wrapper) NodApsUT(ut float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+func (w *wrapper) NodApsUT(ut float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
 	setCalcFlagsState(fl)
 	return nodApsUT(ut, pl, fl.Flags, m)
 }
@@ -198,12 +200,12 @@ func (w *wrapper) JdUT1ToUTC(ut1 float64, ct swego.CalType) (y, m, d, h, i int, 
 }
 
 // Houses implements swego.Interface.
-func (w *wrapper) Houses(ut, geolat, geolon float64, hsys swego.HSys) ([]float64, [10]float64, error) {
+func (w *wrapper) Houses(ut, geolat, geolon float64, hsys swego.HSys) ([]float64, []float64, error) {
 	return houses(ut, geolat, geolon, hsys)
 }
 
 // HousesEx implements swego.Interface.
-func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys swego.HSys) ([]float64, [10]float64, error) {
+func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys swego.HSys) ([]float64, []float64, error) {
 	if (fl.Flags & flgSidereal) == flgSidereal {
 		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	}
@@ -212,7 +214,7 @@ func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon fl
 }
 
 // HousesArmc implements swego.Interface.
-func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys swego.HSys) ([]float64, [10]float64, error) {
+func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys swego.HSys) ([]float64, []float64, error) {
 	return housesArmc(armc, geolat, eps, hsys)
 }
 

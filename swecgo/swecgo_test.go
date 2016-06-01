@@ -3,6 +3,7 @@
 package swecgo
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/dwlnetnl/swego"
@@ -72,51 +73,51 @@ func TestCalc(t *testing.T) {
 	t.Parallel()
 
 	type result struct {
-		xx  [6]float64
+		xx  []float64
 		cfl int
 	}
 
 	cases := []struct {
-		fn   func(float64, swego.Planet, swego.CalcFlags) ([6]float64, int, error)
+		fn   func(float64, swego.Planet, swego.CalcFlags) ([]float64, int, error)
 		in   swego.CalcFlags
 		want result
 	}{
 		{gWrapper.Calc,
 			swego.CalcFlags{Flags: swego.FlagEphJPL},
-			result{[6]float64{279.858461, .000229, .983331}, 1}},
+			result{[]float64{279.858461, .000229, .983331, .0, .0, .0}, 1}},
 		{gWrapper.CalcUT,
 			swego.CalcFlags{Flags: swego.FlagEphJPL},
-			result{[6]float64{279.859214, .000229, .983331}, 1}},
+			result{[]float64{279.859214, .000229, .983331, .0, .0, .0}, 1}},
 		{gWrapper.Calc,
 			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
-			result{[6]float64{279.858461, .000230, .983331}, 1}},
+			result{[]float64{279.858461, .000230, .983331, .0, .0, .0}, 1}},
 		{gWrapper.CalcUT,
 			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
-			result{[6]float64{279.859214, .000230, .983331}, 1}},
+			result{[]float64{279.859214, .000230, .983331, .0, .0, .0}, 1}},
 		{gWrapper.Calc,
 			swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
 				TopoLoc: swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
-			result{[6]float64{279.858426, -.000966, .983369}, 32769}},
+			result{[]float64{279.858426, -.000966, .983369, .0, .0, .0}, 32769}},
 		{gWrapper.CalcUT,
 			swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
 				TopoLoc: swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
-			result{[6]float64{279.859186, -.000966, .983369}, 32769}},
+			result{[]float64{279.859186, -.000966, .983369, .0, .0, .0}, 32769}},
 		{gWrapper.Calc,
 			swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
 				SidMode: swego.SidMode{Mode: 0},
 			},
-			result{[6]float64{255.121938, .000229, .983331}, 65601}},
+			result{[]float64{255.121938, .000229, .983331, .0, .0, .0}, 65601}},
 		{gWrapper.CalcUT,
 			swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
 				SidMode: swego.SidMode{Mode: 0},
 			},
-			result{[6]float64{255.122691, .000229, .983331}, 65601}},
+			result{[]float64{255.122691, .000229, .983331, .0, .0, .0}, 65601}},
 	}
 
 	for _, c := range cases {
@@ -127,7 +128,7 @@ func TestCalc(t *testing.T) {
 				t.Errorf("err != nil, got: %q", err)
 			}
 
-			if !inDelta(xx[:], c.want.xx[:], 1e-6) {
+			if !inDelta(xx, c.want.xx, 1e-6) {
 				t.Errorf("xx != %v ± 1e-6, got: %v", c.want.xx, xx)
 			}
 
@@ -142,7 +143,7 @@ func TestCalc_error(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn  func(float64, swego.Planet, swego.CalcFlags) ([6]float64, int, error)
+		fn  func(float64, swego.Planet, swego.CalcFlags) ([]float64, int, error)
 		err string
 	}{
 		{gWrapper.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
@@ -161,8 +162,8 @@ func TestCalc_error(t *testing.T) {
 				t.Errorf("err != %q, got: %q", err, c.err)
 			}
 
-			if xx != ([6]float64{}) {
-				t.Error("xx != [6]float{}, got:", xx)
+			if !reflect.DeepEqual(xx, make([]float64, 6)) {
+				t.Error("xx != []float{}, got:", xx)
 			}
 
 			if cfl != -1 {
@@ -176,37 +177,37 @@ func TestNodAps(t *testing.T) {
 	t.Parallel()
 
 	type result struct {
-		nasc, ndsc, peri, aphe [6]float64
+		nasc, ndsc, peri, aphe []float64
 	}
 
 	cases := []struct {
-		fn   func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
+		fn   func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
 		in   swego.NodApsMethod
 		want result
 	}{
 		{gWrapper.NodAps, swego.NodbitMean, result{
-			[6]float64{125.067162, .0, .002461},
-			[6]float64{305.067162, .0, .002671},
-			[6]float64{83.408587, -3.425232, .002428},
-			[6]float64{263.408587, 3.425232, .002710},
+			[]float64{125.067162, .0, .002461, .0, .0, .0},
+			[]float64{305.067162, .0, .002671, .0, .0, .0},
+			[]float64{83.408587, -3.425232, .002428, .0, .0, .0},
+			[]float64{263.408587, 3.425232, .002710, .0, .0, .0},
 		}},
 		{gWrapper.NodApsUT, swego.NodbitMean, result{
-			[6]float64{125.067123, .0, .002461},
-			[6]float64{305.067123, .0, .002671},
-			[6]float64{83.408669, -3.425224, .002428},
-			[6]float64{263.408669, 3.425224, .002710},
+			[]float64{125.067123, .0, .002461, .0, .0, .0},
+			[]float64{305.067123, .0, .002671, .0, .0, .0},
+			[]float64{83.408669, -3.425224, .002428, .0, .0, .0},
+			[]float64{263.408669, 3.425224, .002710, .0, .0, .0},
 		}},
 		{gWrapper.NodAps, swego.NodbitMean | swego.NodbitFoPoint, result{
-			[6]float64{125.067162, .0, .002461},
-			[6]float64{305.067162, .0, .002671},
-			[6]float64{83.408587, -3.425232, .002428},
-			[6]float64{263.408587, 3.425232, .000282}, // different
+			[]float64{125.067162, .0, .002461, .0, .0, .0},
+			[]float64{305.067162, .0, .002671, .0, .0, .0},
+			[]float64{83.408587, -3.425232, .002428, .0, .0, .0},
+			[]float64{263.408587, 3.425232, .000282, .0, .0, .0}, // different
 		}},
 		{gWrapper.NodApsUT, swego.NodbitMean | swego.NodbitFoPoint, result{
-			[6]float64{125.067123, .0, .002461},
-			[6]float64{305.067123, .0, .002671},
-			[6]float64{83.408669, -3.425224, .002428},
-			[6]float64{263.408669, 3.425224, .000282}, // different
+			[]float64{125.067123, .0, .002461, .0, .0, .0},
+			[]float64{305.067123, .0, .002671, .0, .0, .0},
+			[]float64{83.408669, -3.425224, .002428, .0, .0, .0},
+			[]float64{263.408669, 3.425224, .000282, .0, .0, .0}, // different
 		}},
 	}
 
@@ -218,19 +219,19 @@ func TestNodAps(t *testing.T) {
 				t.Errorf("err != nil, got: %q", err)
 			}
 
-			if !inDelta(nasc[:], c.want.nasc[:], 1e-6) {
+			if !inDelta(nasc, c.want.nasc, 1e-6) {
 				t.Errorf("nasc != %v ± 1e-6, got: %v", c.want.nasc, nasc)
 			}
 
-			if !inDelta(ndsc[:], c.want.ndsc[:], 1e-6) {
+			if !inDelta(ndsc, c.want.ndsc, 1e-6) {
 				t.Errorf("ndsc != %v ± 1e-6, got: %v", c.want.ndsc, ndsc)
 			}
 
-			if !inDelta(peri[:], c.want.peri[:], 1e-6) {
+			if !inDelta(peri, c.want.peri, 1e-6) {
 				t.Errorf("peri != %v ± 1e-6, got: %v", c.want.peri, peri)
 			}
 
-			if !inDelta(aphe[:], c.want.aphe[:], 1e-6) {
+			if !inDelta(aphe, c.want.aphe, 1e-6) {
 				t.Errorf("aphe != %v ± 1e-6, got: %v", c.want.aphe, aphe)
 			}
 		})
@@ -241,7 +242,7 @@ func TestNodAps_error(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn  func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
+		fn  func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
 		err string
 	}{
 		{gWrapper.NodAps, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
@@ -260,20 +261,20 @@ func TestNodAps_error(t *testing.T) {
 				t.Errorf("err != %q, got: %q", err, c.err)
 			}
 
-			if nasc != ([6]float64{}) {
-				t.Error("nasc != [6]float{}, got:", nasc)
+			if !reflect.DeepEqual(nasc, make([]float64, 6)) {
+				t.Error("nasc != []float{}, got:", nasc)
 			}
 
-			if ndsc != ([6]float64{}) {
-				t.Error("ndsc != [6]float{}, got:", ndsc)
+			if !reflect.DeepEqual(ndsc, make([]float64, 6)) {
+				t.Error("ndsc != []float{}, got:", ndsc)
 			}
 
-			if peri != ([6]float64{}) {
-				t.Error("peri != [6]float{}, got:", peri)
+			if !reflect.DeepEqual(peri, make([]float64, 6)) {
+				t.Error("peri != []float{}, got:", peri)
 			}
 
-			if aphe != ([6]float64{}) {
-				t.Error("aphe != [6]float{}, got:", aphe)
+			if !reflect.DeepEqual(aphe, make([]float64, 6)) {
+				t.Error("aphe != []float{}, got:", aphe)
 			}
 		})
 	}
@@ -485,7 +486,7 @@ func TestHouses(t *testing.T) {
 
 	type result struct {
 		cusps []float64
-		ascmc [10]float64
+		ascmc []float64
 		err   string
 	}
 
@@ -498,9 +499,10 @@ func TestHouses(t *testing.T) {
 				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
 				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
 			},
-			[10]float64{
+			[]float64{
 				190.553653, 103.886819, 105.080915, 24.306488,
 				196.367263, 214.734661, 192.275917, 34.734661,
+				.0, .0,
 			},
 			"",
 		}},
@@ -509,9 +511,10 @@ func TestHouses(t *testing.T) {
 				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
 				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
 			},
-			[10]float64{
+			[]float64{
 				183.972931, 103.886819, 105.080915, 17.393326,
 				196.367263, 352.493044, 195.452718, 172.493044,
+				.0, .0,
 			},
 			"swecgo: error calculating houses",
 		}},
@@ -524,9 +527,10 @@ func TestHouses(t *testing.T) {
 				319.373115, 308.213369, 296.328153, 283.886819, 271.215325, 258.741976,
 				246.822987, 235.634583, 225.214174, 215.538288, 206.565986, 198.252908,
 			},
-			[10]float64{
+			[]float64{
 				190.553653, 103.886819, 105.080915, 24.306488,
 				196.367263, 214.734661, 192.275917, 34.734661,
+				.0, .0,
 			},
 			"",
 		}},
@@ -546,7 +550,7 @@ func TestHouses(t *testing.T) {
 					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
 			}
 
-			if !inDelta(ascmc[:], c.want.ascmc[:], 1e-6) {
+			if !inDelta(ascmc, c.want.ascmc, 1e-6) {
 				t.Errorf("(%f, %c) ascmc != %v, got: %v",
 					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
 			}
@@ -565,7 +569,7 @@ func TestHousesEx(t *testing.T) {
 
 	type result struct {
 		cusps []float64
-		ascmc [10]float64
+		ascmc []float64
 		err   string
 	}
 
@@ -578,9 +582,10 @@ func TestHousesEx(t *testing.T) {
 				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
 				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
 			},
-			[10]float64{
+			[]float64{
 				190.553653, 103.886819, 105.080915, 24.306488,
 				196.367263, 214.734661, 192.275917, 34.734661,
+				.0, .0,
 			},
 			"",
 		}},
@@ -589,9 +594,10 @@ func TestHousesEx(t *testing.T) {
 				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
 				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
 			},
-			[10]float64{
+			[]float64{
 				183.972931, 103.886819, 105.080915, 17.393326,
 				196.367263, 352.493044, 195.452718, 172.493044,
+				.0, .0,
 			},
 			"swecgo: error calculating houses",
 		}},
@@ -604,9 +610,10 @@ func TestHousesEx(t *testing.T) {
 				319.373115, 308.213369, 296.328153, 283.886819, 271.215325, 258.741976,
 				246.822987, 235.634583, 225.214174, 215.538288, 206.565986, 198.252908,
 			},
-			[10]float64{
+			[]float64{
 				190.553653, 103.886819, 105.080915, 24.306488,
 				196.367263, 214.734661, 192.275917, 34.734661,
+				.0, .0,
 			},
 			"",
 		}},
@@ -619,9 +626,10 @@ func TestHousesEx(t *testing.T) {
 					165.817130, 190.801765, 222.086464, 259.150296, 294.636593, 323.416459,
 					345.817130, 10.801765, 42.086464, 79.150296, 114.636593, 143.416459,
 				},
-				[10]float64{
+				[]float64{
 					165.817130, 79.150296, 105.080915, 359.569965,
 					171.630740, 189.998138, 167.539394, 9.998138,
+					.0, .0,
 				},
 				"",
 			}},
@@ -642,7 +650,7 @@ func TestHousesEx(t *testing.T) {
 					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
 			}
 
-			if !inDelta(ascmc[:], c.want.ascmc[:], 1e-6) {
+			if !inDelta(ascmc, c.want.ascmc, 1e-6) {
 				t.Errorf("(%f, %c) ascmc != %v, got: %v",
 					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
 			}
@@ -660,7 +668,7 @@ func TestHousesArmc(t *testing.T) {
 
 	type result struct {
 		cusps []float64
-		ascmc [10]float64
+		ascmc []float64
 		err   string
 	}
 
@@ -673,9 +681,10 @@ func TestHousesArmc(t *testing.T) {
 				190.553489, 215.537888, 246.822499, 283.886657, 319.373244, 348.153088,
 				10.553489, 35.537888, 66.822499, 103.886657, 139.373244, 168.153088,
 			},
-			[10]float64{
+			[]float64{
 				190.553489, 103.886657, 105.080916, 24.307632,
 				196.367450, 214.737779, 192.275825, 34.737779,
+				.0, .0,
 			},
 			"",
 		}},
@@ -684,9 +693,10 @@ func TestHousesArmc(t *testing.T) {
 				183.972748, 217.277384, 250.582021, 283.886657, 310.582021, 337.277384,
 				3.972748, 37.277384, 70.582021, 103.886657, 130.582021, 157.277384,
 			},
-			[10]float64{
+			[]float64{
 				183.972748, 103.886657, 105.080916, 17.393607,
 				196.367450, 352.493777, 195.452830, 172.493777,
+				.0, .0,
 			},
 			"swecgo: error calculating houses",
 		}},
@@ -699,24 +709,10 @@ func TestHousesArmc(t *testing.T) {
 				319.373244, 308.213442, 296.328129, 283.886657, 271.215011, 258.741543,
 				246.822499, 235.634096, 225.213720, 215.537888, 206.565652, 198.252653,
 			},
-			[10]float64{
+			[]float64{
 				190.553489, 103.886657, 105.080916, 24.307632,
 				196.367450, 214.737779, 192.275825, 34.737779,
-			},
-			"",
-		}},
-		{input{52.083333, 'g'}, result{
-			[]float64{0,
-				190.553489, 183.704585, 176.258665, 168.153088, 159.331033, 149.746863,
-				139.373244, 128.213442, 116.328129, 103.886657, 91.215011, 78.741543,
-				66.822499, 55.634096, 45.213720, 35.537888, 26.565652, 18.252653,
-				10.553489, 3.704585, 356.258665, 348.153088, 339.331033, 329.746863,
-				319.373244, 308.213442, 296.328129, 283.886657, 271.215011, 258.741543,
-				246.822499, 235.634096, 225.213720, 215.537888, 206.565652, 198.252653,
-			},
-			[10]float64{
-				190.553489, 103.886657, 105.080916, 24.307632,
-				196.367450, 214.737779, 192.275825, 34.737779,
+				.0, .0,
 			},
 			"",
 		}},
@@ -736,7 +732,7 @@ func TestHousesArmc(t *testing.T) {
 					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
 			}
 
-			if !inDelta(ascmc[:], c.want.ascmc[:], 1e-6) {
+			if !inDelta(ascmc, c.want.ascmc, 1e-6) {
 				t.Errorf("(%f, %c) ascmc != %v, got: %v",
 					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
 			}

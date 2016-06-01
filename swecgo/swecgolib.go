@@ -151,9 +151,16 @@ const (
 
 type _calcFunc func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32
 
-func _calc(jd float64, fl int32, fn _calcFunc) (xx [6]float64, cfl int, err error) {
+func _calc(jd float64, fl int32, fn _calcFunc) (_ []float64, cfl int, err error) {
 	_jd := C.double(jd)
 	_fl := C.int32(fl)
+
+	// Both the float64 and C.double types are defined as an IEEE-754 64-bit
+	// floating-point number. This means the representation in memory of a
+	// float64 array is equivalent to that of a C.double array. It means it is
+	// possible to cast between the two types. In Go land such operation is
+	// considered unsafe, hence the use of the unsafe package.
+	var xx [6]float64
 	_xx := (*C.double)(unsafe.Pointer(&xx[0]))
 
 	err = withError(func(err *C.char) bool {
@@ -161,16 +168,16 @@ func _calc(jd float64, fl int32, fn _calcFunc) (xx [6]float64, cfl int, err erro
 		return cfl == C.ERR
 	})
 
-	return
+	return xx[:], cfl, err
 }
 
-func calc(et float64, pl swego.Planet, fl int32) ([6]float64, int, error) {
+func calc(et float64, pl swego.Planet, fl int32) ([]float64, int, error) {
 	return _calc(et, fl, func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32 {
 		return C.swe_calc(jd, C.int(pl), fl, xx, err)
 	})
 }
 
-func calcUT(ut float64, pl swego.Planet, fl int32) ([6]float64, int, error) {
+func calcUT(ut float64, pl swego.Planet, fl int32) ([]float64, int, error) {
 	return _calc(ut, fl, func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32 {
 		return C.swe_calc_ut(jd, C.int32(pl), fl, xx, err)
 	})
@@ -178,11 +185,18 @@ func calcUT(ut float64, pl swego.Planet, fl int32) ([6]float64, int, error) {
 
 type _nodApsFunc func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32
 
-func _nodAps(jd float64, pl swego.Planet, fl int32, m swego.NodApsMethod, fn _nodApsFunc) (nasc, ndsc, peri, aphe [6]float64, err error) {
+func _nodAps(jd float64, pl swego.Planet, fl int32, m swego.NodApsMethod, fn _nodApsFunc) (_, _, _, _ []float64, err error) {
 	_jd := C.double(jd)
 	_pl := C.int32(pl)
 	_fl := C.int32(fl)
 	_m := C.int32(m)
+
+	// Both the float64 and C.double types are defined as an IEEE-754 64-bit
+	// floating-point number. This means the representation in memory of a
+	// float64 array is equivalent to that of a C.double array. It means it is
+	// possible to cast between the two types. In Go land such operation is
+	// considered unsafe, hence the use of the unsafe package.
+	var nasc, ndsc, peri, aphe [6]float64
 	_nasc := (*C.double)(unsafe.Pointer(&nasc[0]))
 	_ndsc := (*C.double)(unsafe.Pointer(&ndsc[0]))
 	_peri := (*C.double)(unsafe.Pointer(&peri[0]))
@@ -193,16 +207,16 @@ func _nodAps(jd float64, pl swego.Planet, fl int32, m swego.NodApsMethod, fn _no
 		return rc == C.ERR
 	})
 
-	return
+	return nasc[:], ndsc[:], peri[:], aphe[:], err
 }
 
-func nodAps(et float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+func nodAps(et float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
 	return _nodAps(et, pl, fl, m, func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32 {
 		return C.swe_nod_aps(jd, pl, fl, m, nasc, ndsc, peri, aphe, err)
 	})
 }
 
-func nodApsUT(ut float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error) {
+func nodApsUT(ut float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
 	return _nodAps(ut, pl, fl, m, func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32 {
 		return C.swe_nod_aps_ut(jd, pl, fl, m, nasc, ndsc, peri, aphe, err)
 	})
@@ -322,11 +336,17 @@ func jdUT1ToUTC(ut float64, gf int) (y, m, d, h, i int, s float64) {
 
 type _housesFunc func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int
 
-func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_ []float64, ascmc [10]float64, err error) {
+func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_, _ []float64, err error) {
 	_lat := C.double(lat)
 	_hsys := C.int(hsys)
 
+	// Both the float64 and C.double types are defined as an IEEE-754 64-bit
+	// floating-point number. This means the representation in memory of a
+	// float64 array is equivalent to that of a C.double array. It means it is
+	// possible to cast between the two types. In Go land such operation is
+	// considered unsafe, hence the use of the unsafe package.
 	var cusps [37]float64
+	var ascmc [10]float64
 	_cusps := (*C.double)(unsafe.Pointer(&cusps[0]))
 	_ascmc := (*C.double)(unsafe.Pointer(&ascmc[0]))
 
@@ -339,10 +359,10 @@ func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_ []float64, ascmc [
 		n = 37
 	}
 
-	return cusps[:n:n], ascmc, err
+	return cusps[:n:n], ascmc[:], err
 }
 
-func houses(ut, lat, lng float64, hsys swego.HSys) ([]float64, [10]float64, error) {
+func houses(ut, lat, lng float64, hsys swego.HSys) ([]float64, []float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_jd := C.double(ut)
 		_lng := C.double(lng)
@@ -350,7 +370,7 @@ func houses(ut, lat, lng float64, hsys swego.HSys) ([]float64, [10]float64, erro
 	})
 }
 
-func housesEx(ut float64, fl int32, lat, lng float64, hsys swego.HSys) ([]float64, [10]float64, error) {
+func housesEx(ut float64, fl int32, lat, lng float64, hsys swego.HSys) ([]float64, []float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_jd := C.double(ut)
 		_fl := C.int32(fl)
@@ -359,7 +379,7 @@ func housesEx(ut float64, fl int32, lat, lng float64, hsys swego.HSys) ([]float6
 	})
 }
 
-func housesArmc(armc, lat, eps float64, hsys swego.HSys) ([]float64, [10]float64, error) {
+func housesArmc(armc, lat, eps float64, hsys swego.HSys) ([]float64, []float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_armc := C.double(armc)
 		_eps := C.double(eps)

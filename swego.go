@@ -90,23 +90,23 @@ type Interface interface {
 
 	// Calc computes the position and optionally the speed of planet pl at Julian
 	// Date (in Ephemeris Time) et with calculation flags fl.
-	Calc(et float64, pl Planet, fl CalcFlags) (xx [6]float64, cfl int, err error)
+	Calc(et float64, pl Planet, fl CalcFlags) (xx []float64, cfl int, err error)
 	// CalcUT computes the position and optionally the speed of planet pl at
 	// Julian Date (in Universal Time) ut with calculation flags fl. Within the C
 	// library swe_deltat is called to convert Universal Time to Ephemeris Time.
-	CalcUT(ut float64, pl Planet, fl CalcFlags) (xx [6]float64, cfl int, err error)
+	CalcUT(ut float64, pl Planet, fl CalcFlags) (xx []float64, cfl int, err error)
 
 	// NodAps computes the positions of planetary nodes and apsides (perihelia,
 	// aphelia, second focal points of the orbital ellipses) for planet pl at
 	// Julian Date (in Ephemeris Time) et with calculation flags fl using method
 	// m.
-	NodAps(et float64, pl Planet, fl CalcFlags, m NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
+	NodAps(et float64, pl Planet, fl CalcFlags, m NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
 	// NodApsUT computes the positions of planetary nodes and apsides (perihelia,
 	// aphelia, second focal points of the orbital ellipses) for planet pl at
 	// Julian Date (in Ephemeris Time) et with calculation flags fl using method
 	// m. Within the C library swe_deltat is called to convert Universal Time to
 	// Ephemeris Time.
-	NodApsUT(ut float64, pl Planet, fl CalcFlags, m NodApsMethod) (nasc, ndsc, peri, aphe [6]float64, err error)
+	NodApsUT(ut float64, pl Planet, fl CalcFlags, m NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
 
 	// PlanetName returns the name of planet pl.
 	PlanetName(pl Planet) string
@@ -150,17 +150,17 @@ type Interface interface {
 	// Houses returns the house cusps and related positions for the given
 	// geographic location using the given house system. The return values may
 	// contain data in case of an error. Geolat and geolon are in degrees.
-	Houses(ut, geolat, geolon float64, hsys HSys) ([]float64, [10]float64, error)
+	Houses(ut, geolat, geolon float64, hsys HSys) ([]float64, []float64, error)
 	// HousesEx returns the house cusps and related positions for the given
 	// geographic location using the given house system and the provided flags
 	// (reference frame). The return values may contain data in case of an error.
 	// Geolat and geolon are in degrees.
-	HousesEx(ut float64, fl HousesExFlags, geolat, geolon float64, hsys HSys) ([]float64, [10]float64, error)
+	HousesEx(ut float64, fl HousesExFlags, geolat, geolon float64, hsys HSys) ([]float64, []float64, error)
 	// HousesArmc returns the house cusps and related positions for the given
 	// geographic location using the given house system, ecliptic obliquity and
 	// ARMC (also known as RAMC). The return values may contain data in case of
 	// an error. ARMC, geolat, geolon and eps are in degrees.
-	HousesArmc(armc, geolat, eps float64, hsys HSys) ([]float64, [10]float64, error)
+	HousesArmc(armc, geolat, eps float64, hsys HSys) ([]float64, []float64, error)
 	// HousePos returns the house position for the ecliptic longitude and
 	// latitude of a planet for a given ARMC (also known as RAMC) and geocentric
 	// latitude using the given house system. ARMC, geolat, eps, pllng and pllat
