@@ -93,6 +93,7 @@ const (
 	FlagSpeed        = 1 << 8
 	FlagNoGDefl      = 1 << 9
 	FlagNoAbber      = 1 << 10
+	FlagAstrometric  = FlagNoAbber | FlagNoGDefl
 	FlagEquatorial   = 1 << 11
 	FlagXYZ          = 1 << 12
 	FlagRadians      = 1 << 13
@@ -137,7 +138,23 @@ const (
 	SidmTrueCitra          Ayanamsa = 27
 	SidmTrueRevati         Ayanamsa = 28
 	SidmTruePushya         Ayanamsa = 29
+	SidmGalCentGilBrand    Ayanamsa = 30
+	SidmGalAlignMardyks    Ayanamsa = 31
+	SidmGalEquIAU1958      Ayanamsa = 32
+	SidmGalEquTrue         Ayanamsa = 33
+	SidmGalEquMula         Ayanamsa = 34
+	SidmGalTrueMula        Ayanamsa = 35
+	SidmGalCentMulaWilhelm Ayanamsa = 36
+	SidmAryabhata522       Ayanamsa = 37
+	SidmBabylBritton       Ayanamsa = 38
 	SidmUser               Ayanamsa = 255
+)
+
+// Options that augment a sidereal mode (ayanamsa).
+const (
+	SidbitEclT0    Ayanamsa = 256
+	SidbitSSYPlane Ayanamsa = 512
+	SidbitUserUT   Ayanamsa = 1024
 )
 
 // Nodes and apsides calculation bits defined in swephexp.h.
@@ -162,17 +179,29 @@ const (
 	Equal                HSys = 'E' // also 'A'
 	Alcabitius           HSys = 'B'
 	Campanus             HSys = 'C'
+	EqualMC              HSys = 'D' // Equal houses, where cusp 10 = MC
+	CarterPoliEquatorial HSys = 'F'
 	Gauquelin            HSys = 'G'
 	Azimuthal            HSys = 'H'
+	Sunshine             HSys = 'I' // Treindl
+	SunshineAlt          HSys = 'i' // Makransky
 	Koch                 HSys = 'K'
+	PullenSD             HSys = 'L'
 	Morinus              HSys = 'M'
-	Porphyrius           HSys = 'O'
+	EqualAsc             HSys = 'N' // Equal houses, where cusp 1 = 0° Aries
+	Porphyrius           HSys = 'O' // Porphyry
 	Placidus             HSys = 'P'
+	PullenSR             HSys = 'Q'
 	Regiomontanus        HSys = 'R'
-	PolichPage           HSys = 'T'
+	Sripati              HSys = 'S'
+	PolichPage           HSys = 'T' // Topocentric
 	KrusinskiPisaGoelzer HSys = 'U'
-	VehlowEqual          HSys = 'V'
+	VehlowEqual          HSys = 'V' // Equal Vehlow
 	WholeSign            HSys = 'W'
 	AxialRotation        HSys = 'X'
 	APCHouses            HSys = 'Y'
 )
+
+// ResetDeltaT resets the user defined ΔT value inside the Swiss Ephemeris so
+// the ΔT values will be calculated by the library again.
+const ResetDeltaT = -1e-10

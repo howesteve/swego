@@ -4,15 +4,14 @@
 package swecgo
 
 import (
-	"runtime"
 	"sync"
 
 	"github.com/dwlnetnl/swego"
 )
 
 // Call calls fn within an initialized execution context. The initialization of
-// this context is done by calling init. If init is nil, the default data path
-// is set to DefaultPath. For more information see the Programmer's
+// this context is done by calling initFn. If initFn is nil, the default data
+// path is set to DefaultPath. For more information see the Programmer's
 // Documentation about swe_set_ephe_path.
 //
 // In non-TLS-mode only a single fn can be executed at any point time. This is
@@ -20,18 +19,18 @@ import (
 // all closures it receives and Call blocks waiting until fn is done executing.
 //
 // TLS-mode (Thread Local Storage) is currently not implemented.
-func Call(init func(swego.Interface), fn func(swego.Interface)) {
-	initWrapper(init)
+func Call(initFn func(swego.Interface), fn func(swego.Interface)) {
+	initGWrapper(initFn)
 	gWrapper.execute(fn)
 	// In TLS-mode fn would be called on a single thread in a pool of locked OS
 	// threads. For more information about this see runtime.LockOSThread.
 }
 
 // NewInvoker initializes an execution context and returns it.
-// If init is nil, the default data path is set to DefaultPath. For more
+// If initFn is nil, the default data path is set to DefaultPath. For more
 // information see the Programmer's Documentation about swe_set_ephe_path.
-func NewInvoker(init func(swego.Interface)) swego.Invoker {
-	initWrapper(init)
+func NewInvoker(initFn func(swego.Interface)) swego.Invoker {
+	initGWrapper(initFn)
 	return gWrapper
 }
 
@@ -43,36 +42,44 @@ func (w *wrapper) Invoke(fn func(swego.Interface)) error {
 
 // ----------
 
-var gWrapper = new(wrapper)
+var gWrapper *wrapper
+var gWrapperOnce sync.Once
 
-type wrapper struct {
-	once sync.Once
-	fnCh chan func()
-}
-
-var _ swego.Interface = (*wrapper)(nil) // assert interface
-
-func initWrapper(init func(swego.Interface)) {
-	gWrapper.once.Do(func() {
+func initGWrapper(initFn func(swego.Interface)) {
+	gWrapperOnce.Do(func() {
 		if supportsTLS() {
 			panic("Swiss Ephemeris library with Thread Local Storage enabled " +
 				"is not supported")
 		}
 
-		if init == nil {
-			init = func(swe swego.Interface) {
+		gWrapper = newWrapper()
+
+		if initFn == nil {
+			initFn = func(swe swego.Interface) {
 				swe.SetPath(DefaultPath)
 			}
 		}
 
-		gWrapper.fnCh = make(chan func())
-		go gWrapper.runLoop()
-		gWrapper.execute(init)
+		gWrapper.execute(initFn)
 	})
 }
 
+// ----------
+
+type wrapper struct {
+	fnCh chan func()
+}
+
+func newWrapper() *wrapper {
+	w := &wrapper{fnCh: make(chan func())}
+	go w.runLoop()
+	return w
+}
+
 func (w *wrapper) runLoop() {
-	runtime.LockOSThread()
+	// Run loop is a separate goroutine.
+	// The OS thread is always locked during a cgo call.
+	// This code might change if Thread Local Storage (TLS) is used.
 
 	for fn := range w.fnCh {
 		fn()
@@ -93,16 +100,24 @@ func (w *wrapper) execute(fn func(swego.Interface)) {
 
 // ----------
 
+var _ swego.Interface = (*wrapper)(nil) // assert interface
+
 // Version implements swego.Interface.
 func (w *wrapper) Version() string { return Version }
+
+// GetLibraryPath implements swego.Interface.
+func (w *wrapper) GetLibraryPath() string { return getLibraryPath() }
 
 // SetPath implements swego.Interface.
 func (w *wrapper) SetPath(ephepath string) { setEphePath(ephepath) }
 
 // Close implements swego.Interface.
-func (w *wrapper) Close() { close() }
+func (w *wrapper) Close() {
+	closeEphemeris()
+	// w.fnCh should be closed, but w is gWrapper and is global we must not.
+}
 
-func setCalcFlagsState(fl swego.CalcFlags) {
+func setCalcFlagsState(fl *swego.CalcFlags) {
 	if (fl.Flags & flgTopo) == flgTopo {
 		setTopo(fl.TopoLoc.Long, fl.TopoLoc.Lat, fl.TopoLoc.Alt)
 	}
@@ -118,53 +133,53 @@ func setCalcFlagsState(fl swego.CalcFlags) {
 	setFileNameJPL(fl.FileNameJPL)
 }
 
+// PlanetName implements swego.Interface.
+func (w *wrapper) PlanetName(pl swego.Planet) string { return planetName(pl) }
+
 // Calc implements swego.Interface.
-func (w *wrapper) Calc(et float64, pl swego.Planet, fl swego.CalcFlags) ([]float64, int, error) {
+func (w *wrapper) Calc(et float64, pl swego.Planet, fl *swego.CalcFlags) ([]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calc(et, pl, fl.Flags)
 }
 
 // CalcUT implements swego.Interface.
-func (w *wrapper) CalcUT(ut float64, pl swego.Planet, fl swego.CalcFlags) ([]float64, int, error) {
+func (w *wrapper) CalcUT(ut float64, pl swego.Planet, fl *swego.CalcFlags) ([]float64, int, error) {
 	setCalcFlagsState(fl)
 	return calcUT(ut, pl, fl.Flags)
 }
 
 // NodAps implements swego.Interface.
-func (w *wrapper) NodAps(et float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
+func (w *wrapper) NodAps(et float64, pl swego.Planet, fl *swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
 	setCalcFlagsState(fl)
 	return nodAps(et, pl, fl.Flags, m)
 }
 
 // NodApsUT implements swego.Interface.
-func (w *wrapper) NodApsUT(ut float64, pl swego.Planet, fl swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
+func (w *wrapper) NodApsUT(ut float64, pl swego.Planet, fl *swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
 	setCalcFlagsState(fl)
 	return nodApsUT(ut, pl, fl.Flags, m)
 }
 
-// PlanetName implements swego.Interface.
-func (w *wrapper) PlanetName(pl swego.Planet) string { return planetName(pl) }
-
 // GetAyanamsa implements swego.Interface.
-func (w *wrapper) GetAyanamsa(et float64, sidmode swego.SidMode) float64 {
+func (w *wrapper) GetAyanamsa(et float64, sidmode *swego.SidMode) float64 {
 	setSidMode(sidmode.Mode, sidmode.T0, sidmode.AyanT0)
 	return getAyanamsa(et)
 }
 
 // GetAyanamsaUT implements swego.Interface.
-func (w *wrapper) GetAyanamsaUT(ut float64, sidmode swego.SidMode) float64 {
+func (w *wrapper) GetAyanamsaUT(ut float64, sidmode *swego.SidMode) float64 {
 	setSidMode(sidmode.Mode, sidmode.T0, sidmode.AyanT0)
 	return getAyanamsaUT(ut)
 }
 
 // GetAyanamsaEx implements swego.Interface.
-func (w *wrapper) GetAyanamsaEx(et float64, fl swego.AyanamsaExFlags) (float64, error) {
+func (w *wrapper) GetAyanamsaEx(et float64, fl *swego.AyanamsaExFlags) (float64, error) {
 	setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	return getAyanamsaEx(et, fl.Flags)
 }
 
 // GetAyanamsaExUT implements swego.Interface.
-func (w *wrapper) GetAyanamsaExUT(ut float64, fl swego.AyanamsaExFlags) (float64, error) {
+func (w *wrapper) GetAyanamsaExUT(ut float64, fl *swego.AyanamsaExFlags) (float64, error) {
 	setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	return getAyanamsaExUT(ut, fl.Flags)
 }
@@ -205,7 +220,7 @@ func (w *wrapper) Houses(ut, geolat, geolon float64, hsys swego.HSys) ([]float64
 }
 
 // HousesEx implements swego.Interface.
-func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon float64, hsys swego.HSys) ([]float64, []float64, error) {
+func (w *wrapper) HousesEx(ut float64, fl *swego.HousesExFlags, geolat, geolon float64, hsys swego.HSys) ([]float64, []float64, error) {
 	if (fl.Flags & flgSidereal) == flgSidereal {
 		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
 	}
@@ -213,9 +228,9 @@ func (w *wrapper) HousesEx(ut float64, fl swego.HousesExFlags, geolat, geolon fl
 	return housesEx(ut, fl.Flags, geolat, geolon, hsys)
 }
 
-// HousesArmc implements swego.Interface.
-func (w *wrapper) HousesArmc(armc, geolat, eps float64, hsys swego.HSys) ([]float64, []float64, error) {
-	return housesArmc(armc, geolat, eps, hsys)
+// HousesARMC implements swego.Interface.
+func (w *wrapper) HousesARMC(armc, geolat, eps float64, hsys swego.HSys) ([]float64, []float64, error) {
+	return housesARMC(armc, geolat, eps, hsys)
 }
 
 // HousePos implements swego.Interface.
@@ -224,7 +239,9 @@ func (w *wrapper) HousePos(armc, geolat, eps float64, hsys swego.HSys, pllng, pl
 }
 
 // HouseName implements swego.Interface.
-func (w *wrapper) HouseName(hsys swego.HSys) string { return houseName(hsys) }
+func (w *wrapper) HouseName(hsys swego.HSys) string {
+	return houseName(hsys)
+}
 
 // DeltaT implements swego.Interface.
 func (w *wrapper) DeltaT(jd float64) float64 { return deltaT(jd) }
@@ -233,6 +250,9 @@ func (w *wrapper) DeltaT(jd float64) float64 { return deltaT(jd) }
 func (w *wrapper) DeltaTEx(jd float64, eph swego.Ephemeris) (float64, error) {
 	return deltaTEx(jd, int32(eph))
 }
+
+// SetDeltaTUserDef implements swego.Interface.
+func (w *wrapper) SetDeltaTUserDef(v float64) { setDeltaTUserDef(v) }
 
 // TimeEqu implements swego.Interface.
 func (w *wrapper) TimeEqu(jd float64) (float64, error) { return timeEqu(jd) }

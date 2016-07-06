@@ -60,12 +60,34 @@ func TestVersion(t *testing.T) {
 	})
 }
 
+func TestGetLibraryPath(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		libpath := swe.GetLibraryPath()
+		if libpath == "" {
+			t.Error(`libpath == ""`)
+		}
+	})
+}
+
 func TestClose(t *testing.T) {
 	t.Parallel()
 
 	Call(nil, func(swe swego.Interface) {
 		swe.Close()
 		swe.SetPath(DefaultPath)
+	})
+}
+
+func TestPlanetName(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		name := swe.PlanetName(swego.Sun)
+		if name != "Sun" {
+			t.Errorf(`PlanetName(Sun) != "Sun", got: %q`, name)
+		}
 	})
 }
 
@@ -78,44 +100,44 @@ func TestCalc(t *testing.T) {
 	}
 
 	cases := []struct {
-		fn   func(float64, swego.Planet, swego.CalcFlags) ([]float64, int, error)
-		in   swego.CalcFlags
+		fn   func(float64, swego.Planet, *swego.CalcFlags) ([]float64, int, error)
+		in   *swego.CalcFlags
 		want result
 	}{
 		{gWrapper.Calc,
-			swego.CalcFlags{Flags: swego.FlagEphJPL},
+			&swego.CalcFlags{Flags: swego.FlagEphJPL},
 			result{[]float64{279.858461, .000229, .983331, .0, .0, .0}, 1}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{Flags: swego.FlagEphJPL},
+			&swego.CalcFlags{Flags: swego.FlagEphJPL},
 			result{[]float64{279.859214, .000229, .983331, .0, .0, .0}, 1}},
 		{gWrapper.Calc,
-			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
+			&swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
 			result{[]float64{279.858461, .000230, .983331, .0, .0, .0}, 1}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
+			&swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
 			result{[]float64{279.859214, .000230, .983331, .0, .0, .0}, 1}},
 		{gWrapper.Calc,
-			swego.CalcFlags{
+			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
-				TopoLoc: swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
+				TopoLoc: &swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
 			result{[]float64{279.858426, -.000966, .983369, .0, .0, .0}, 32769}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{
+			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
-				TopoLoc: swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
+				TopoLoc: &swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
 			result{[]float64{279.859186, -.000966, .983369, .0, .0, .0}, 32769}},
 		{gWrapper.Calc,
-			swego.CalcFlags{
+			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
-				SidMode: swego.SidMode{Mode: 0},
+				SidMode: &swego.SidMode{},
 			},
 			result{[]float64{255.121938, .000229, .983331, .0, .0, .0}, 65601}},
 		{gWrapper.CalcUT,
-			swego.CalcFlags{
+			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
-				SidMode: swego.SidMode{Mode: 0},
+				SidMode: &swego.SidMode{},
 			},
 			result{[]float64{255.122691, .000229, .983331, .0, .0, .0}, 65601}},
 	}
@@ -143,16 +165,20 @@ func TestCalc_error(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn  func(float64, swego.Planet, swego.CalcFlags) ([]float64, int, error)
+		fn  func(float64, swego.Planet, *swego.CalcFlags) ([]float64, int, error)
 		err string
 	}{
 		{gWrapper.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 		{gWrapper.CalcUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
+	fl := &swego.CalcFlags{
+		Flags: swego.FlagEphJPL,
+	}
+
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			xx, cfl, err := c.fn(99999999., swego.Sun, swego.CalcFlags{Flags: swego.FlagEphJPL})
+			xx, cfl, err := c.fn(99999999., swego.Sun, fl)
 
 			if err == nil {
 				t.Fatal("err == nil")
@@ -181,7 +207,7 @@ func TestNodAps(t *testing.T) {
 	}
 
 	cases := []struct {
-		fn   func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
+		fn   func(float64, swego.Planet, *swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
 		in   swego.NodApsMethod
 		want result
 	}{
@@ -211,9 +237,13 @@ func TestNodAps(t *testing.T) {
 		}},
 	}
 
+	fl := &swego.CalcFlags{
+		Flags: swego.FlagEphJPL,
+	}
+
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			nasc, ndsc, peri, aphe, err := c.fn(2451544.5, swego.Moon, swego.CalcFlags{Flags: swego.FlagEphJPL}, c.in)
+			nasc, ndsc, peri, aphe, err := c.fn(2451544.5, swego.Moon, fl, c.in)
 
 			if err != nil {
 				t.Errorf("err != nil, got: %q", err)
@@ -242,16 +272,20 @@ func TestNodAps_error(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn  func(float64, swego.Planet, swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
+		fn  func(float64, swego.Planet, *swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
 		err string
 	}{
 		{gWrapper.NodAps, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 		{gWrapper.NodApsUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
+	fl := &swego.CalcFlags{
+		Flags: swego.FlagEphJPL,
+	}
+
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			nasc, ndsc, peri, aphe, err := c.fn(99999999., swego.Moon, swego.CalcFlags{Flags: swego.FlagEphJPL}, swego.NodbitMean)
+			nasc, ndsc, peri, aphe, err := c.fn(99999999., swego.Moon, fl, swego.NodbitMean)
 
 			if err == nil {
 				t.Fatal("err == nil")
@@ -280,31 +314,22 @@ func TestNodAps_error(t *testing.T) {
 	}
 }
 
-func TestPlanetName(t *testing.T) {
-	t.Parallel()
-
-	Call(nil, func(swe swego.Interface) {
-		name := swe.PlanetName(swego.Sun)
-		if name != "Sun" {
-			t.Errorf(`PlanetName(Sun) != "Sun", got: %q`, name)
-		}
-	})
-}
-
 func TestGetAyanamsa(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn   func(float64, swego.SidMode) float64
+		fn   func(float64, *swego.SidMode) float64
 		want float64
 	}{
 		{gWrapper.GetAyanamsa, 24.740393},
 		{gWrapper.GetAyanamsaUT, 24.740393},
 	}
 
+	fl := &swego.SidMode{}
+
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			got := c.fn(2451544.5, swego.SidMode{Mode: 0})
+			got := c.fn(2451544.5, fl)
 
 			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
 				t.Errorf("deltaT != %f, got: %f", c.want, got)
@@ -317,23 +342,21 @@ func TestGetAyanamsaEx(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		fn   func(float64, swego.AyanamsaExFlags) (float64, error)
+		fn   func(float64, *swego.AyanamsaExFlags) (float64, error)
 		want float64
 	}{
 		{gWrapper.GetAyanamsaEx, 24.740393},
 		{gWrapper.GetAyanamsaExUT, 24.740393},
 	}
 
+	fl := &swego.AyanamsaExFlags{
+		Flags:   1,
+		SidMode: &swego.SidMode{},
+	}
+
 	for _, c := range cases {
 		Call(nil, func(_ swego.Interface) {
-			got, err := c.fn(2451544.5, swego.AyanamsaExFlags{
-				Flags: 1,
-				SidMode: swego.SidMode{
-					Mode:   0,
-					T0:     0,
-					AyanT0: 0,
-				},
-			})
+			got, err := c.fn(2451544.5, fl)
 
 			if err != nil {
 				t.Fatalf("err != nil, got: %q", err)
@@ -558,6 +581,20 @@ func TestHouses(t *testing.T) {
 			},
 			"",
 		}},
+		// SunshineAlt is the only lower case house system letter.
+		// It is introduced in Swiss Ephemeris version 2.05.
+		{input{52.083333, swego.SunshineAlt}, result{
+			[]float64{0,
+				190.553653, 216.974402, 246.972073, 283.886819, 318.522699, 345.395439,
+				10.553653, 26.204261, 52.666679, 103.886819, 151.275154, 175.374467,
+			},
+			[]float64{
+				190.553653, 103.886819, 105.080915, 24.306488,
+				196.367263, 214.734661, 192.275917, 34.734661,
+				.0, .0,
+			},
+			"",
+		}},
 	}
 
 	for _, c := range cases {
@@ -588,7 +625,7 @@ func TestHousesEx(t *testing.T) {
 	type input struct {
 		geolat float64
 		hsys   swego.HSys
-		flags  swego.HousesExFlags
+		flags  *swego.HousesExFlags
 	}
 
 	type result struct {
@@ -601,7 +638,7 @@ func TestHousesEx(t *testing.T) {
 		in   input
 		want result
 	}{
-		{input{52.083333, swego.Placidus, swego.HousesExFlags{}}, result{
+		{input{52.083333, swego.Placidus, &swego.HousesExFlags{}}, result{
 			[]float64{0,
 				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
 				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
@@ -613,7 +650,7 @@ func TestHousesEx(t *testing.T) {
 			},
 			"",
 		}},
-		{input{82.083333, swego.Koch, swego.HousesExFlags{}}, result{
+		{input{82.083333, swego.Koch, &swego.HousesExFlags{}}, result{
 			[]float64{0,
 				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
 				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
@@ -625,7 +662,7 @@ func TestHousesEx(t *testing.T) {
 			},
 			"swecgo: error calculating houses",
 		}},
-		{input{52.083333, swego.Gauquelin, swego.HousesExFlags{}}, result{
+		{input{52.083333, swego.Gauquelin, &swego.HousesExFlags{}}, result{
 			[]float64{0,
 				190.553653, 183.704634, 176.258623, 168.152982, 159.330891, 149.746713,
 				139.373115, 128.213369, 116.328153, 103.886819, 91.215325, 78.741976,
@@ -641,9 +678,9 @@ func TestHousesEx(t *testing.T) {
 			},
 			"",
 		}},
-		{input{52.083333, swego.Placidus, swego.HousesExFlags{
+		{input{52.083333, swego.Placidus, &swego.HousesExFlags{
 			Flags:   flgSidereal,
-			SidMode: swego.SidMode{Mode: 0},
+			SidMode: &swego.SidMode{},
 		}},
 			result{
 				[]float64{0,
@@ -657,6 +694,20 @@ func TestHousesEx(t *testing.T) {
 				},
 				"",
 			}},
+		// SunshineAlt is the only lower case house system letter.
+		// It is introduced in Swiss Ephemeris version 2.05.
+		{input{52.083333, swego.SunshineAlt, &swego.HousesExFlags{}}, result{
+			[]float64{0,
+				190.553653, 216.974402, 246.972073, 283.886819, 318.522699, 345.395439,
+				10.553653, 26.204261, 52.666679, 103.886819, 151.275154, 175.374467,
+			},
+			[]float64{
+				190.553653, 103.886819, 105.080915, 24.306488,
+				196.367263, 214.734661, 192.275917, 34.734661,
+				.0, .0,
+			},
+			"",
+		}},
 	}
 
 	for _, c := range cases {
@@ -740,11 +791,25 @@ func TestHousesArmc(t *testing.T) {
 			},
 			"",
 		}},
+		// SunshineAlt is the only lower case house system letter.
+		// It is introduced in Swiss Ephemeris version 2.05.
+		{input{52.083333, swego.SunshineAlt}, result{
+			[]float64{0,
+				190.553489, 213.007193, 243.038107, 283.886657, 322.037715, 349.034810,
+				10.553489, 33.007193, 63.038107, 103.886657, 142.037715, 169.034810,
+			},
+			[]float64{
+				190.553489, 103.886657, 105.080916, 24.307632,
+				196.367450, 214.737779, 192.275825, 34.737779,
+				.0, .0,
+			},
+			"",
+		}},
 	}
 
 	for _, c := range cases {
 		Call(nil, func(swe swego.Interface) {
-			cusps, ascmc, err := swe.HousesArmc(105.080916, c.in.geolat, 23.439279, c.in.hsys)
+			cusps, ascmc, err := swe.HousesARMC(105.080916, c.in.geolat, 23.439279, c.in.hsys)
 
 			if c.want.err != "" && c.want.err != err.Error() {
 				t.Fatalf("(%f, %c) err != %q, got: %q",
@@ -784,10 +849,15 @@ func TestHousePos(t *testing.T) {
 		{input{52.083333, swego.Placidus}, result{6.355326, ""}},
 		{input{82.083333, swego.Koch}, result{6.355326, ""}},
 		{input{52.083333, swego.Gauquelin}, result{20.934023, ""}},
+		// SunshineAlt is the only lower case house system letter.
+		// It is introduced in Swiss Ephemeris version 2.05.
+		{input{52.083333, swego.SunshineAlt}, result{6.509577, ""}},
 	}
-
 	for _, c := range cases {
 		Call(nil, func(swe swego.Interface) {
+			// Houses, HousesEx or HousesARMC should be called before HousePos.
+			_, _, _ = swe.HousesARMC(105.080916, c.in.geolat, 23.439279, c.in.hsys)
+
 			pos, err := swe.HousePos(105.080916, c.in.geolat, 23.439279, c.in.hsys,
 				279.858461, 0.000229)
 
@@ -841,6 +911,26 @@ func TestDeltaTEx(t *testing.T) {
 		if !inDelta([]float64{got}, []float64{0.000739}, 1e-6) {
 			t.Errorf("DeltaTEx(2451544.5, Swiss) != 0.000739, got: %f", got)
 		}
+	})
+}
+
+func TestSetDeltaTUserDef(t *testing.T) {
+	t.Parallel()
+
+	Call(nil, func(swe swego.Interface) {
+		want := 63.8496
+		swe.SetDeltaTUserDef(want)
+
+		// Normally you should not use DeltaT but in this test case the call to
+		// swe_set_delta_t_userdef() is tested, not the ΔT value.
+		got := swe.DeltaT(0.)
+
+		if got != want {
+			t.Errorf("user defined ΔT not set correctly; ΔT != %f, got: %f",
+				want, got)
+		}
+
+		swe.SetDeltaTUserDef(swego.ResetDeltaT) // restore ΔT calculation
 	})
 }
 

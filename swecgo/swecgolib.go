@@ -16,7 +16,7 @@ import (
 // current working directory. The tracing facility has 2 modes:
 //
 //  TRACE=1 writes swetrace.{c,txt} and appends each session to it.
-//  TRACE=2 writes swetrace_<pid>.{c, txt} where pid is the running process id.
+//  TRACE=2 writes swetrace_<pid>.{c,txt} where pid is the running process id.
 //
 // To build a version of the Swiss Ephemeris that has tracing has enabled
 // uncomment one of the #cgo CFLAGS lines below or overwrite the cgo CFLAGS by
@@ -29,12 +29,11 @@ import (
 // When swe_close() is called it may possible to also close the tracing system.
 // To enable this uncomment the TRACE_CLOSE=1 line or set the CGO_CFLAGS
 // environment variable ("-DTRACE_CLOSE=1"). There is no guarantee that the
-// tracing can be reopened after it is closed for the first time.
+// tracing can be reopened after it is closed the first time.
 //
-// If the internal package is dirty and Go needs to build it every time it's
-// very easy to enable the tracing and the trace limit per build using the
-// CGO_CFLAGS environment variable. To inspect the Go build process pass the -x
-// argument flag.
+// It's very easy to enable the tracing and the trace limit per build using the
+// CGO_CFLAGS environment variable. It can be helpful to inspect the Go build
+// process pass the -x argument flag.
 
 // #cgo CFLAGS: -DTRACE=1
 // #cgo CFLAGS: -DTRACE=2
@@ -43,14 +42,14 @@ import (
 
 // ----------
 
-// Enable thread local storage in library.
-// #cgo CFLAGS: -DTLS_ENABLED=1
+// Disable thread local storage in library.
+#cgo CFLAGS: -DTLSOFF=1
 
 int swex_supports_tls() {
-#if TLS_ENABLED
-	return 1;
-#else
+#ifdef TLSOFF
 	return 0;
+#else
+	return 1;
 #endif
 }
 
@@ -62,16 +61,6 @@ int swex_supports_tls() {
 #include <string.h>
 #include "swephexp.h"
 #include "sweph.h"
-
-void swex_set_topo(double geolon, double geolat, double geoalt) {
-	if (swed.geopos_is_set == FALSE
-		|| swed.topd.geolon != geolon
-		|| swed.topd.geolat != geolat
-		|| swed.topd.geoalt != geoalt
-	)	{
-		swe_set_topo(geolon, geolat, geoalt);
-	}
-}
 
 void swex_set_sid_mode(int32 sid_mode, double t0, double ayan_t0) {
 	if (swed.ayana_is_set == FALSE
@@ -98,6 +87,9 @@ func supportsTLS() bool {
 
 const errPrefix = "swecgo: "
 
+// withError calls fn with a pre allocated error variable that can passed to a
+// function in the C library. The code block must return true if an error is
+// returned from the C call.
 func withError(fn func(err *C.char) bool) error {
 	var _err [C.AS_MAXCH]C.char
 
@@ -120,18 +112,18 @@ func setEphePath(path string) {
 	C.free(unsafe.Pointer(_path))
 }
 
+func getLibraryPath() string {
+	var _libpath [C.AS_MAXCH]C.char
+	C.swe_get_library_path(&_libpath[0])
+	return C.GoString(&_libpath[0])
+}
+
 func setTopo(lng, lat, alt float64) {
-	_lng := C.double(lng)
-	_lat := C.double(lat)
-	_alt := C.double(alt)
-	C.swex_set_topo(_lng, _lat, _alt)
+	C.swe_set_topo(C.double(lng), C.double(lat), C.double(alt))
 }
 
 func setSidMode(mode swego.Ayanamsa, t0, ayanT0 float64) {
-	_mode := C.int32(mode)
-	_t0 := C.double(t0)
-	_ayanT0 := C.double(ayanT0)
-	C.swex_set_sid_mode(_mode, _t0, _ayanT0)
+	C.swex_set_sid_mode(C.int32(mode), C.double(t0), C.double(ayanT0))
 }
 
 func setFileNameJPL(name string) {
@@ -140,7 +132,7 @@ func setFileNameJPL(name string) {
 	C.free(unsafe.Pointer(_name))
 }
 
-func close() {
+func closeEphemeris() {
 	C.swe_close()
 }
 
@@ -148,6 +140,12 @@ const (
 	flgTopo     = C.SEFLG_TOPOCTR
 	flgSidereal = C.SEFLG_SIDEREAL
 )
+
+func planetName(pl swego.Planet) string {
+	var _name [C.AS_MAXCH]C.char
+	C.swe_get_planet_name(C.int(pl), &_name[0])
+	return C.GoString(&_name[0])
+}
 
 type _calcFunc func(jd C.double, fl C.int32, xx *C.double, err *C.char) C.int32
 
@@ -203,8 +201,7 @@ func _nodAps(jd float64, pl swego.Planet, fl int32, m swego.NodApsMethod, fn _no
 	_aphe := (*C.double)(unsafe.Pointer(&aphe[0]))
 
 	err = withError(func(err *C.char) bool {
-		rc := int(fn(_jd, _pl, _fl, _m, _nasc, _ndsc, _peri, _aphe, err))
-		return rc == C.ERR
+		return C.ERR == fn(_jd, _pl, _fl, _m, _nasc, _ndsc, _peri, _aphe, err)
 	})
 
 	return nasc[:], ndsc[:], peri[:], aphe[:], err
@@ -220,12 +217,6 @@ func nodApsUT(ut float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc
 	return _nodAps(ut, pl, fl, m, func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32 {
 		return C.swe_nod_aps_ut(jd, pl, fl, m, nasc, ndsc, peri, aphe, err)
 	})
-}
-
-func planetName(pl swego.Planet) string {
-	var _name [C.AS_MAXCH]C.char
-	C.swe_get_planet_name(C.int(pl), &_name[0])
-	return C.GoString(&_name[0])
 }
 
 func getAyanamsa(et float64) float64 {
@@ -244,8 +235,7 @@ func _getAyanamsaEx(jd float64, fl int32, fn _getAyanamsaExFunc) (aya float64, e
 	_aya := (*C.double)(unsafe.Pointer(&aya))
 
 	err = withError(func(err *C.char) bool {
-		rc := int(fn(_jd, _fl, _aya, err))
-		return rc == C.ERR
+		return C.ERR == fn(_jd, _fl, _aya, err)
 	})
 
 	return
@@ -302,8 +292,7 @@ func utcToJD(y, m, d, h, i int, s float64, gf int) (et, ut float64, err error) {
 	var jds [2]C.double
 
 	err = withError(func(err *C.char) bool {
-		rc := int(C.swe_utc_to_jd(_y, _m, _d, _h, _i, _s, _gf, &jds[0], err))
-		return rc == C.ERR
+		return C.ERR == C.swe_utc_to_jd(_y, _m, _d, _h, _i, _s, _gf, &jds[0], err)
 	})
 
 	et = float64(jds[0])
@@ -362,8 +351,12 @@ func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_, _ []float64, err 
 		err = errors.New(errPrefix + "error calculating houses")
 	}
 
+	// The house system letters are practically constants. If those are changed,
+	// it is done via a new version of the Swiss Ephemeris anyway. Also this is
+	// already fairly low level code, so a check for the Gauquelin 'house system'
+	// letter is no problem.
 	n := 13
-	if hsys == swego.Gauquelin {
+	if hsys == 'G' || hsys == 'g' {
 		n = 37
 	}
 
@@ -387,7 +380,7 @@ func housesEx(ut float64, fl int32, lat, lng float64, hsys swego.HSys) ([]float6
 	})
 }
 
-func housesArmc(armc, lat, eps float64, hsys swego.HSys) ([]float64, []float64, error) {
+func housesARMC(armc, lat, eps float64, hsys swego.HSys) ([]float64, []float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_armc := C.double(armc)
 		_eps := C.double(eps)
@@ -427,12 +420,15 @@ func deltaTEx(jd float64, eph int32) (deltaT float64, err error) {
 	return
 }
 
+func setDeltaTUserDef(v float64) {
+	C.swe_set_delta_t_userdef(C.double(v))
+}
+
 func timeEqu(jd float64) (E float64, err error) {
 	var _E C.double
 
 	err = withError(func(err *C.char) bool {
-		rc := int(C.swe_time_equ(C.double(jd), &_E, err))
-		return rc == C.ERR
+		return C.ERR == C.swe_time_equ(C.double(jd), &_E, err)
 	})
 
 	E = float64(_E)
@@ -447,8 +443,7 @@ func _convertLMTLAT(from, geolon float64, fn _convertLMTLATFunc) (to float64, er
 	var _to C.double
 
 	err = withError(func(err *C.char) bool {
-		rc := int(fn(_from, _lng, &_to, err))
-		return rc == C.ERR
+		return C.ERR == fn(_from, _lng, &_to, err)
 	})
 
 	to = float64(_to)

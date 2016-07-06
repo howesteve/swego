@@ -10,14 +10,22 @@ func TestNewHSys(t *testing.T) {
 		{'A', true}, // Equal
 		{'B', true}, // Alcabitius
 		{'C', true}, // Campanus
+		{'D', true}, // Equal houses, where cusp 10 = MC
 		{'E', true}, // Equal
+		{'F', true}, // Carter poli-equatorial
 		{'G', true}, // Gauquelin sectors
 		{'H', true}, // Azimuthal
+		{'I', true}, // Sunshine (Treindl)
+		{'i', true}, // Sunshine (Makransky)
 		{'K', true}, // Koch
+		{'L', true}, // Pullen SD (sinusoidal delta) = ex Neo-Porphyry
 		{'M', true}, // Morinus
+		{'N', true}, // Equal houses, where cusp 1 = 0 Aries
 		{'O', true}, // Porphyrius
 		{'P', true}, // Placidus
+		{'Q', true}, // Pullen SR (sinusoidal ratio)
 		{'R', true}, // Regiomontanus
+		{'S', true}, // Sripati
 		{'T', true}, // Polich-Page
 		{'U', true}, // Krusinski-Pisa-Goelzer
 		{'V', true}, // Vehlow equal
@@ -25,7 +33,6 @@ func TestNewHSys(t *testing.T) {
 		{'X', true}, // Axial rotation
 		{'Y', true}, // APC houses
 		{'_', false},
-		{'S', false},
 		{'Z', false},
 	}
 

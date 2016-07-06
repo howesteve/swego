@@ -4,11 +4,14 @@ Package swego allows access to the Swiss Ephemeris from Go.
 ## Implemented C functions
 Currently the following subset of the C API is implemented:
 - [`swe_version`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200807)
-- [`swe_calc`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200740)
-- [`swe_calc_ut`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200740)
 - [`swe_close`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200805)
+- [`swe_get_library_path`](http://www.astro.com/swisseph/swephprg.htm#_Toc452449218)
 - [`swe_set_ephe_path`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200804)
 - [`swe_set_jpl_file`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200806) (via arguments passed to method)
+- [`swe_calc`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200740)
+- [`swe_calc_ut`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200740)
+- [`swe_nod_aps`](http://www.astro.com/swisseph/swephprg.htm#_Toc452449232)
+- [`swe_nod_aps_ut`](http://www.astro.com/swisseph/swephprg.htm#_Toc452449231)
 - [`swe_get_planet_name`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200762)
 - [`swe_set_topo`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200753) (via arguments passed to method)
 - [`swe_set_sid_mode`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200801) (via arguments passed to method)
@@ -29,6 +32,7 @@ Currently the following subset of the C API is implemented:
 - [`swe_house_name`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200812)
 - [`swe_deltat`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200796) (_you should use `swe_deltat_ex`_)
 - [`swe_deltat_ex`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200795)
+- [`swe_set_delta_t_userdef`](http://www.astro.com/swisseph/swephprg.htm#_Toc452449264)
 - [`swe_time_equ`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200793)
 - [`swe_lmt_to_lat`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200793)
 - [`swe_lat_to_lmt`](http://www.astro.com/swisseph/swephprg.htm#_Toc433200793)
@@ -62,9 +66,9 @@ func main() {
 			log.Fatal(err)
 		}
 
-		log.Println("xx[0]", xx[0]) // xx[0] 279.8592144230896
-		log.Println("xx[1]", xx[1]) // xx[1] 0.0002296532779708701
-		log.Println("xx[2]", xx[2]) // xx[2] 0.9833318568951198
+		log.Println("xx[0]", xx[0]) // xx[0] 279.8592144230897
+		log.Println("xx[1]", xx[1]) // xx[1] 0.0002296532779708713
+		log.Println("xx[2]", xx[2]) // xx[2] 0.9833318568951199
 		log.Println("xx[3]", xx[3]) // xx[3] 0
 		log.Println("xx[4]", xx[4]) // xx[4] 0
 		log.Println("xx[5]", xx[5]) // xx[5] 0
