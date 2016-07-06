@@ -43,7 +43,7 @@ Currently the following subset of the C API is implemented:
 ### What is the deal with that _via arguments passed to method_?
 The reason is to eliminate the number of calls a user has to make. This is in contrast with the C API that requires you to call `swe_set_topo` before `swe_calc` when you for example are calculating the topocentric position of Venus. Only calling a single C function is important in the context of Go because you like to minimize the number of calls to C.
 
-Currently the implementation is smart about when to call `swe_set_topo`, but it figures this out in via a C call separate of the calculation. So here's room for improvement but this can be done without changing the public API.
+Currently the implementation calls always `swe_set_topo` before a `swe_calc`, however this could be combined into a single C function call without changing the public API.
 
 ## Pronunciation
 The name of this package is pronounced _swie-go_, like cgo: cee-go.
