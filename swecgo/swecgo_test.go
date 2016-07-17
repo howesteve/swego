@@ -119,13 +119,13 @@ func TestCalc(t *testing.T) {
 		{gWrapper.Calc,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
-				TopoLoc: &swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
+				TopoLoc: &swego.GeoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
 			result{[]float64{279.858426, -.000966, .983369, .0, .0, .0}, 32769}},
 		{gWrapper.CalcUT,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
-				TopoLoc: &swego.TopoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
+				TopoLoc: &swego.GeoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
 			result{[]float64{279.859186, -.000966, .983369, .0, .0, .0}, 32769}},
 		{gWrapper.Calc,

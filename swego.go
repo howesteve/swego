@@ -19,8 +19,8 @@ type SidMode struct {
 	AyanT0 float64
 }
 
-// TopoLoc represents the arguments to swe_set_topo.
-type TopoLoc struct {
+// GeoLoc represents a geographic location.
+type GeoLoc struct {
 	Long float64
 	Lat  float64
 	Alt  float64
@@ -30,7 +30,7 @@ type TopoLoc struct {
 // stateless way.
 type CalcFlags struct {
 	Flags   int32
-	TopoLoc *TopoLoc
+	TopoLoc *GeoLoc // arguments to swe_set_topo
 	SidMode *SidMode
 
 	// FileNameJPL represents the argument to swe_set_jpl_file.
