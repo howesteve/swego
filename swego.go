@@ -37,6 +37,13 @@ type CalcFlags struct {
 	FileNameJPL string
 }
 
+// Copy returns a copy of the calculation flags fl.
+func (fl *CalcFlags) Copy() *CalcFlags {
+	copy := new(CalcFlags)
+	*copy = *fl
+	return copy
+}
+
 // Ephemeris represents an ephemeris implemented in the C library.
 type Ephemeris int32
 

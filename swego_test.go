@@ -53,8 +53,18 @@ func TestNewHSys(t *testing.T) {
 	}
 }
 
+func TestCalcFlags_Copy(t *testing.T) {
+	fl := new(CalcFlags)
+	fl.Flags = FlagSpeed
+	got := fl.Copy()
+
+	if got == fl {
+		t.Errorf("%p = %p, want copy", got, fl)
+	}
+}
+
 func TestCalcFlags_SetEphemeris(t *testing.T) {
-	fl := CalcFlags{}
+	fl := new(CalcFlags)
 	fl.SetEphemeris(JPL)
 
 	if fl.Flags != int32(JPL) {
