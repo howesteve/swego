@@ -56,6 +56,8 @@ const (
 	Proserpina       Planet = 57
 	Waldemath        Planet = 58
 
+	EclNut Planet = -1
+
 	AstOffset = 10000
 )
 
