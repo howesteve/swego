@@ -3,21 +3,24 @@
 package swecgo
 
 import (
+	"math"
 	"reflect"
 	"testing"
 
 	"github.com/dwlnetnl/swego"
 )
 
-func inDelta(a, b []float64, delta float64) bool {
-	if len(a) != len(b) {
+func inDelta(lhs, rhs, delta float64) bool {
+	return math.Abs(lhs-rhs) < delta
+}
+
+func inDeltaSlice(lhs, rhs []float64, delta float64) bool {
+	if len(lhs) != len(rhs) {
 		return false
 	}
 
-	for i, lhs := range a {
-		d := lhs - b[i]
-
-		if d < -delta || d > delta {
+	for i, lhs := range lhs {
+		if !inDelta(lhs, rhs[i], delta) {
 			return false
 		}
 	}
@@ -26,12 +29,12 @@ func inDelta(a, b []float64, delta float64) bool {
 }
 
 func TestConstantCheck(t *testing.T) {
-	if flgSidereal != swego.FlagSidereal {
-		t.Errorf("Sidereal: want %d, got: %d", flgSidereal, swego.FlagSidereal)
+	if swego.FlagSidereal != flgSidereal {
+		t.Errorf("Sidereal = %d, want: %d", swego.FlagSidereal, flgSidereal)
 	}
 
-	if flgTopo != swego.FlagTopo {
-		t.Errorf("Topo: want %d, got: %d", flgTopo, swego.FlagTopo)
+	if swego.FlagTopo != flgTopo {
+		t.Errorf("Topo = %d, want: %d", swego.FlagTopo, flgTopo)
 	}
 }
 
@@ -55,7 +58,7 @@ func TestVersion(t *testing.T) {
 		got := swe.Version()
 
 		if got != Version {
-			t.Errorf("Version() != %s, got: %q", Version, got)
+			t.Errorf("Version() = %q, want: %q", got, Version)
 		}
 	})
 }
@@ -86,7 +89,7 @@ func TestPlanetName(t *testing.T) {
 	Call(nil, func(swe swego.Interface) {
 		name := swe.PlanetName(swego.Sun)
 		if name != "Sun" {
-			t.Errorf(`PlanetName(Sun) != "Sun", got: %q`, name)
+			t.Errorf("PlanetName(Sun) = %q, want: \"Sun\"", name)
 		}
 	})
 }
@@ -147,15 +150,15 @@ func TestCalc(t *testing.T) {
 			xx, cfl, err := c.fn(2451544.5, swego.Sun, c.in)
 
 			if err != nil {
-				t.Errorf("err != nil, got: %q", err)
+				t.Errorf("err = %q, want: nil", err)
 			}
 
-			if !inDelta(xx, c.want.xx, 1e-6) {
-				t.Errorf("xx != %v ± 1e-6, got: %v", c.want.xx, xx)
+			if !inDeltaSlice(xx, c.want.xx, 1e-6) {
+				t.Errorf("xx = %v ± 1e-6, want: %v", xx, c.want.xx)
 			}
 
 			if cfl != c.want.cfl {
-				t.Errorf("cfl != %d, got: %d", c.want.cfl, cfl)
+				t.Errorf("cfl = %d, want: %d", cfl, c.want.cfl)
 			}
 		})
 	}
@@ -185,15 +188,15 @@ func TestCalc_error(t *testing.T) {
 			}
 
 			if err.Error() != c.err {
-				t.Errorf("err != %q, got: %q", err, c.err)
+				t.Errorf("err = %q, want: %q", c.err, err)
 			}
 
 			if !reflect.DeepEqual(xx, make([]float64, 6)) {
-				t.Error("xx != []float{}, got:", xx)
+				t.Errorf("xx = %v, want: []float{}", xx)
 			}
 
 			if cfl != -1 {
-				t.Error("xx != -1, got:", cfl)
+				t.Errorf("cfl = %d, want: -1", cfl)
 			}
 		})
 	}
@@ -246,23 +249,23 @@ func TestNodAps(t *testing.T) {
 			nasc, ndsc, peri, aphe, err := c.fn(2451544.5, swego.Moon, fl, c.in)
 
 			if err != nil {
-				t.Errorf("err != nil, got: %q", err)
+				t.Errorf("err = %v, want: nil", err)
 			}
 
-			if !inDelta(nasc, c.want.nasc, 1e-6) {
-				t.Errorf("nasc != %v ± 1e-6, got: %v", c.want.nasc, nasc)
+			if !inDeltaSlice(nasc, c.want.nasc, 1e-6) {
+				t.Errorf("nasc = %v ± 1e-6, want: %v", nasc, c.want.nasc)
 			}
 
-			if !inDelta(ndsc, c.want.ndsc, 1e-6) {
-				t.Errorf("ndsc != %v ± 1e-6, got: %v", c.want.ndsc, ndsc)
+			if !inDeltaSlice(ndsc, c.want.ndsc, 1e-6) {
+				t.Errorf("ndsc = %v ± 1e-6, want: %v", ndsc, c.want.ndsc)
 			}
 
-			if !inDelta(peri, c.want.peri, 1e-6) {
-				t.Errorf("peri != %v ± 1e-6, got: %v", c.want.peri, peri)
+			if !inDeltaSlice(peri, c.want.peri, 1e-6) {
+				t.Errorf("peri = %v ± 1e-6, want: %v", peri, c.want.peri)
 			}
 
-			if !inDelta(aphe, c.want.aphe, 1e-6) {
-				t.Errorf("aphe != %v ± 1e-6, got: %v", c.want.aphe, aphe)
+			if !inDeltaSlice(aphe, c.want.aphe, 1e-6) {
+				t.Errorf("aphe = %v ± 1e-6, want: %v", aphe, c.want.aphe)
 			}
 		})
 	}
@@ -288,27 +291,27 @@ func TestNodAps_error(t *testing.T) {
 			nasc, ndsc, peri, aphe, err := c.fn(99999999., swego.Moon, fl, swego.NodbitMean)
 
 			if err == nil {
-				t.Fatal("err == nil")
+				t.Fatalf("err = nil, want: %v", c.err)
 			}
 
 			if err.Error() != c.err {
-				t.Errorf("err != %q, got: %q", err, c.err)
+				t.Errorf("err = %q, want: %q", err, c.err)
 			}
 
 			if !reflect.DeepEqual(nasc, make([]float64, 6)) {
-				t.Error("nasc != []float{}, got:", nasc)
+				t.Errorf("nasc = %v, want: []float{}", nasc)
 			}
 
 			if !reflect.DeepEqual(ndsc, make([]float64, 6)) {
-				t.Error("ndsc != []float{}, got:", ndsc)
+				t.Errorf("ndsc = %v, want: []float{}", ndsc)
 			}
 
 			if !reflect.DeepEqual(peri, make([]float64, 6)) {
-				t.Error("peri != []float{}, got:", peri)
+				t.Errorf("peri = %v, want: []float{}", peri)
 			}
 
 			if !reflect.DeepEqual(aphe, make([]float64, 6)) {
-				t.Error("aphe != []float{}, got:", aphe)
+				t.Errorf("aphe = %v, want: []float{}", aphe)
 			}
 		})
 	}
@@ -331,8 +334,8 @@ func TestGetAyanamsa(t *testing.T) {
 		Call(nil, func(_ swego.Interface) {
 			got := c.fn(2451544.5, fl)
 
-			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
-				t.Errorf("deltaT != %f, got: %f", c.want, got)
+			if math.Abs(got-c.want) >= 1e-6 {
+				t.Errorf("deltaT = %f, want: %f", got, c.want)
 			}
 		})
 	}
@@ -359,11 +362,11 @@ func TestGetAyanamsaEx(t *testing.T) {
 			got, err := c.fn(2451544.5, fl)
 
 			if err != nil {
-				t.Fatalf("err != nil, got: %q", err)
+				t.Fatalf("err = %q, want: nil", err)
 			}
 
-			if !inDelta([]float64{got}, []float64{c.want}, 1e-6) {
-				t.Errorf("deltaT != %f, got: %f", c.want, got)
+			if !inDelta(got, c.want, 1e-6) {
+				t.Errorf("deltaT = %f, want: %f", got, c.want)
 			}
 		})
 	}
@@ -373,9 +376,11 @@ func TestGetAyanamsaName(t *testing.T) {
 	t.Parallel()
 
 	Call(nil, func(swe swego.Interface) {
-		name := swe.GetAyanamsaName(0)
-		if name != "Fagan/Bradley" {
-			t.Error("GetAyanamsaName(0) != Fagan/Bradley, got:", name)
+		got := swe.GetAyanamsaName(0)
+		want := "Fagan/Bradley"
+
+		if got != want {
+			t.Errorf("GetAyanamsaName(0) = %q, want: %q", got, want)
 		}
 	})
 }
@@ -386,8 +391,8 @@ func TestJulDay(t *testing.T) {
 	Call(nil, func(swe swego.Interface) {
 		got := swe.JulDay(2000, 1, 1, 0, swego.Gregorian)
 
-		if !inDelta([]float64{got}, []float64{2451544.5}, 1e-6) {
-			t.Errorf("JD != 2451544.5, got: %f", got)
+		if !inDelta(got, 2451544.5, 1e-6) {
+			t.Errorf("JD = %f, want: 2451544.5", got)
 		}
 	})
 }
@@ -399,19 +404,19 @@ func TestRevJul(t *testing.T) {
 		y, m, d, h := swe.RevJul(2451544.5, swego.Gregorian)
 
 		if y != 2000 {
-			t.Errorf("y != 2000, got: %d", y)
+			t.Errorf("y = %d, want: 2000", y)
 		}
 
 		if m != 1 {
-			t.Errorf("m != 1, got: %d", m)
+			t.Errorf("m = %d, want: 1", m)
 		}
 
 		if d != 1 {
-			t.Errorf("d != 1, got: %d", d)
+			t.Errorf("d = %d, want: 1", d)
 		}
 
 		if h != 0 {
-			t.Errorf("h != 0, got: %f", h)
+			t.Errorf("h = %f, want: 0", h)
 		}
 	})
 }
@@ -423,19 +428,19 @@ func TestRevJul_bce(t *testing.T) {
 		y, m, d, h := swe.RevJul(990574.5, swego.Gregorian)
 
 		if y != -2000 {
-			t.Errorf("y != -2000, got: %d", y)
+			t.Errorf("y = %d, want: -2000", y)
 		}
 
 		if m != 1 {
-			t.Errorf("m != 1, got: %d", m)
+			t.Errorf("m = %d, want: 1", m)
 		}
 
 		if d != 1 {
-			t.Errorf("d != 1, got: %d", d)
+			t.Errorf("d = %d, want: 1", d)
 		}
 
 		if h != 0 {
-			t.Errorf("h != 0, got: %f", h)
+			t.Errorf("h = %f, want: 0", h)
 		}
 	})
 }
@@ -450,11 +455,11 @@ func TestUTCToJD(t *testing.T) {
 		want := []float64{2451544.500743, 2451544.500004}
 
 		if err != nil {
-			t.Fatalf("err != nil, got: %q", err)
+			t.Fatalf("err = nil, want: %q", err)
 		}
 
-		if !inDelta(got, want, 1e-6) {
-			t.Errorf("[et, ut] != %v, got: %f", want, got)
+		if !inDeltaSlice(got, want, 1e-6) {
+			t.Errorf("[et, ut] = %v, want: %f", got, want)
 		}
 	})
 }
@@ -466,27 +471,27 @@ func TestJDETToUTC(t *testing.T) {
 		y, m, d, h, i, s := swe.JdETToUTC(2451544.5, swego.Gregorian)
 
 		if y != 1999 {
-			t.Errorf("y != 1999, got: %d", y)
+			t.Errorf("y = %d, want: 1999", y)
 		}
 
 		if m != 12 {
-			t.Errorf("m != 12, got: %d", m)
+			t.Errorf("m = %d, want: 12", m)
 		}
 
 		if d != 31 {
-			t.Errorf("d != 31, got: %d", d)
+			t.Errorf("d = %d, want: 31", d)
 		}
 
 		if h != 23 {
-			t.Errorf("h != 23, got: %d", h)
+			t.Errorf("h = %d, want: 23", h)
 		}
 
 		if i != 58 {
-			t.Errorf("i != 58, got: %d", i)
+			t.Errorf("i = %d, want: 58", i)
 		}
 
-		if !inDelta([]float64{s}, []float64{55.815999}, 1e-6) {
-			t.Errorf("s != 55.815999 ± 1e-6, got: %f", s)
+		if !inDelta(s, 55.815999, 1e-6) {
+			t.Errorf("s = %f ± 1e-6, want: 55.815999", s)
 		}
 	})
 }
@@ -498,27 +503,27 @@ func TestJDUT1ToUTC(t *testing.T) {
 		y, m, d, h, i, s := swe.JdUT1ToUTC(2451544.5, swego.Gregorian)
 
 		if y != 1999 {
-			t.Errorf("y != 1999, got: %d", y)
+			t.Errorf("y = %d, want: 1999", y)
 		}
 
 		if m != 12 {
-			t.Errorf("m != 12, got: %d", m)
+			t.Errorf("m = %d, want: 12", m)
 		}
 
 		if d != 31 {
-			t.Errorf("d != 31, got: %d", d)
+			t.Errorf("d = %d, want: 31", d)
 		}
 
 		if h != 23 {
-			t.Errorf("h != 23, got: %d", h)
+			t.Errorf("h = %d, want: 23", h)
 		}
 
 		if i != 59 {
-			t.Errorf("i != 59, got: %d", i)
+			t.Errorf("i = %d, want: 59", i)
 		}
 
-		if !inDelta([]float64{s}, []float64{59.645586}, 1e-6) {
-			t.Errorf("s != 59.645586 ± 1e-6, got: %f", s)
+		if !inDelta(s, 59.645586, 1e-6) {
+			t.Errorf("s = %f ± 1e-6, want: 59.645586", s)
 		}
 	})
 }
@@ -602,18 +607,18 @@ func TestHouses(t *testing.T) {
 			cusps, ascmc, err := swe.Houses(2451544.5, c.in.geolat, 5.116667, c.in.hsys)
 
 			if c.want.err != "" && c.want.err != err.Error() {
-				t.Fatalf("(%f, %c) err != %q, got: %q",
-					c.in.geolat, c.in.hsys, c.want.err, err)
+				t.Fatalf("(%f, %c) err = %q, want: %q",
+					c.in.geolat, c.in.hsys, err, c.want.err)
 			}
 
-			if !inDelta(cusps, c.want.cusps, 1e-6) {
-				t.Errorf("(%f, %c) cusps != %v, got: %v",
-					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
+			if !inDeltaSlice(cusps, c.want.cusps, 1e-6) {
+				t.Errorf("(%f, %c) cusps = %v, want: %v",
+					c.in.geolat, c.in.hsys, cusps, c.want.cusps)
 			}
 
-			if !inDelta(ascmc, c.want.ascmc, 1e-6) {
-				t.Errorf("(%f, %c) ascmc != %v, got: %v",
-					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
+			if !inDeltaSlice(ascmc, c.want.ascmc, 1e-6) {
+				t.Errorf("(%f, %c) ascmc = %v, want: %v",
+					c.in.geolat, c.in.hsys, ascmc, c.want.ascmc)
 			}
 		})
 	}
@@ -716,18 +721,18 @@ func TestHousesEx(t *testing.T) {
 				5.116667, c.in.hsys)
 
 			if c.want.err != "" && c.want.err != err.Error() {
-				t.Fatalf("(%f, %c) err != %q, got: %q",
-					c.in.geolat, c.in.hsys, c.want.err, err)
+				t.Fatalf("(%f, %c) err = %q, want: %q",
+					c.in.geolat, c.in.hsys, err, c.want.err)
 			}
 
-			if !inDelta(cusps, c.want.cusps, 1e-6) {
-				t.Errorf("(%f, %c) cusps != %v, got: %v",
-					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
+			if !inDeltaSlice(cusps, c.want.cusps, 1e-6) {
+				t.Errorf("(%f, %c) cusps = %v, want: %v",
+					c.in.geolat, c.in.hsys, cusps, c.want.cusps)
 			}
 
-			if !inDelta(ascmc, c.want.ascmc, 1e-6) {
-				t.Errorf("(%f, %c) ascmc != %v, got: %v",
-					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
+			if !inDeltaSlice(ascmc, c.want.ascmc, 1e-6) {
+				t.Errorf("(%f, %c) ascmc = %v, want: %v",
+					c.in.geolat, c.in.hsys, ascmc, c.want.ascmc)
 			}
 		})
 	}
@@ -812,18 +817,18 @@ func TestHousesArmc(t *testing.T) {
 			cusps, ascmc, err := swe.HousesARMC(105.080916, c.in.geolat, 23.439279, c.in.hsys)
 
 			if c.want.err != "" && c.want.err != err.Error() {
-				t.Fatalf("(%f, %c) err != %q, got: %q",
-					c.in.geolat, c.in.hsys, c.want.err, err)
+				t.Fatalf("(%f, %c) err = %q, want: %q",
+					c.in.geolat, c.in.hsys, err, c.want.err)
 			}
 
-			if !inDelta(cusps, c.want.cusps, 1e-6) {
-				t.Errorf("(%f, %c) cusps != %v, got: %v",
-					c.in.geolat, c.in.hsys, c.want.cusps, cusps)
+			if !inDeltaSlice(cusps, c.want.cusps, 1e-6) {
+				t.Errorf("(%f, %c) cusps = %v, want: %v",
+					c.in.geolat, c.in.hsys, cusps, c.want.cusps)
 			}
 
-			if !inDelta(ascmc, c.want.ascmc, 1e-6) {
-				t.Errorf("(%f, %c) ascmc != %v, got: %v",
-					c.in.geolat, c.in.hsys, c.want.ascmc, ascmc)
+			if !inDeltaSlice(ascmc, c.want.ascmc, 1e-6) {
+				t.Errorf("(%f, %c) ascmc = %v, want: %v",
+					c.in.geolat, c.in.hsys, ascmc, c.want.ascmc)
 			}
 		})
 	}
@@ -862,13 +867,13 @@ func TestHousePos(t *testing.T) {
 				279.858461, 0.000229)
 
 			if c.want.err != "" && c.want.err != err.Error() {
-				t.Fatalf("(%f, %c) err != %q, got: %q",
-					c.in.geolat, c.in.hsys, c.want.err, err)
+				t.Fatalf("(%f, %c) err = %q, want: %q",
+					c.in.geolat, c.in.hsys, err, c.want.err)
 			}
 
-			if !inDelta([]float64{pos}, []float64{c.want.pos}, 1e-6) {
-				t.Errorf("(%f, %c) pos != %f, got: %f",
-					c.in.geolat, c.in.hsys, c.want.pos, pos)
+			if !inDelta(pos, c.want.pos, 1e-6) {
+				t.Errorf("(%f, %c) pos = %f, want: %f",
+					c.in.geolat, c.in.hsys, pos, c.want.pos)
 			}
 		})
 	}
@@ -878,10 +883,11 @@ func TestHouseName(t *testing.T) {
 	t.Parallel()
 
 	Call(nil, func(swe swego.Interface) {
-		name := swe.HouseName('P')
+		got := swe.HouseName('P')
+		want := "Placidus"
 
-		if name != "Placidus" {
-			t.Error("HouseName('P') != Placidus, got:", name)
+		if got != want {
+			t.Errorf("HouseName('P') = %q, want: %q", got, want)
 		}
 	})
 }
@@ -892,8 +898,8 @@ func TestDeltaT(t *testing.T) {
 	Call(nil, func(swe swego.Interface) {
 		got := swe.DeltaT(2451544.5)
 
-		if !inDelta([]float64{got}, []float64{0.000739}, 1e-6) {
-			t.Errorf("DeltaT(2451544.5) != 0.000739, got: %f", got)
+		if !inDelta(got, 0.000739, 1e-6) {
+			t.Errorf("DeltaT(2451544.5) = %f, want: 0.000739", got)
 		}
 	})
 }
@@ -905,11 +911,11 @@ func TestDeltaTEx(t *testing.T) {
 		got, err := swe.DeltaTEx(2451544.5, swego.Swiss)
 
 		if err != nil {
-			t.Fatalf("err != nil, got: %q", err)
+			t.Fatalf("err = %q, want: nil", err)
 		}
 
-		if !inDelta([]float64{got}, []float64{0.000739}, 1e-6) {
-			t.Errorf("DeltaTEx(2451544.5, Swiss) != 0.000739, got: %f", got)
+		if !inDelta(got, 0.000739, 1e-6) {
+			t.Errorf("DeltaTEx(2451544.5, Swiss) = %f, want: 0.000739", got)
 		}
 	})
 }
@@ -926,8 +932,7 @@ func TestSetDeltaTUserDef(t *testing.T) {
 		got := swe.DeltaT(0.)
 
 		if got != want {
-			t.Errorf("user defined ΔT not set correctly; ΔT != %f, got: %f",
-				want, got)
+			t.Errorf("user defined ΔT not set correctly; ΔT = %f, want: %f", got, want)
 		}
 
 		swe.SetDeltaTUserDef(swego.ResetDeltaT) // restore ΔT calculation
@@ -941,11 +946,11 @@ func TestTimeEqu(t *testing.T) {
 		got, err := swe.TimeEqu(2451544.5)
 
 		if err != nil {
-			t.Fatalf("err != nil, got: %q", err)
+			t.Fatalf("err = %q, want: nil", err)
 		}
 
-		if !inDelta([]float64{got}, []float64{-0.002116}, 1e-6) {
-			t.Errorf("TimeEqu(2451544.5) != -0.002116, got: %f", got)
+		if !inDelta(got, -0.002116, 1e-6) {
+			t.Errorf("TimeEqu(2451544.5) = %f, want: -0.002116", got)
 		}
 	})
 }
@@ -960,8 +965,8 @@ func TestLMTToLAT(t *testing.T) {
 			t.Fatalf("err != nil, got: %q", err)
 		}
 
-		if !inDelta([]float64{got}, []float64{2451544.497889}, 1e-6) {
-			t.Errorf("LMTToLAT(2451544.5, 5.116667) != 2451544.497889, got: %f", got)
+		if !inDelta(got, 2451544.497889, 1e-6) {
+			t.Errorf("LMTToLAT(2451544.5, 5.116667) = %f, want: 2451544.497889", got)
 		}
 	})
 }
@@ -976,8 +981,8 @@ func TestLATToLMT(t *testing.T) {
 			t.Fatalf("err != nil, got: %q", err)
 		}
 
-		if !inDelta([]float64{got}, []float64{2451544.502112}, 1e-6) {
-			t.Errorf("LATToLMT(2451544.5, 5.116667) != 2451544.502112, got: %f", got)
+		if !inDelta(got, 2451544.502112, 1e-6) {
+			t.Errorf("LATToLMT(2451544.5, 5.116667) = %f, want: 2451544.502112", got)
 		}
 	})
 }
@@ -988,8 +993,8 @@ func TestSidTime0(t *testing.T) {
 	Call(nil, func(swe swego.Interface) {
 		got := swe.SidTime0(2451544.5, 23.439279, -0.003869)
 
-		if !inDelta([]float64{got}, []float64{6.664283}, 1e-6) {
-			t.Errorf("SidTime0(2451544.5, 23.439279, -0.003869) != 6.664283, got: %f", got)
+		if !inDelta(got, 6.664283, 1e-6) {
+			t.Errorf("SidTime0(2451544.5, 23.439279, -0.003869) = %f, want: 6.664283", got)
 		}
 	})
 }
@@ -1000,8 +1005,8 @@ func TestSidTime(t *testing.T) {
 	Call(nil, func(swe swego.Interface) {
 		got := swe.SidTime(2451544.5)
 
-		if !inDelta([]float64{got}, []float64{6.664283}, 1e-6) {
-			t.Errorf("SidTime(2451544.5) != 6.664283, got: %f", got)
+		if !inDelta(got, 6.664283, 1e-6) {
+			t.Errorf("SidTime(2451544.5) = %f, want: 6.664283", got)
 		}
 	})
 }
