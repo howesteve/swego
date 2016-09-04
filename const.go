@@ -178,29 +178,29 @@ const (
 
 // House systems implemented in the C library.
 const (
-	Equal                HSys = 'E' // also 'A'
 	Alcabitius           HSys = 'B'
 	Campanus             HSys = 'C'
 	EqualMC              HSys = 'D' // Equal houses, where cusp 10 = MC
+	Equal                HSys = 'E' // also 'A'
 	CarterPoliEquatorial HSys = 'F'
 	Gauquelin            HSys = 'G'
-	Azimuthal            HSys = 'H'
-	Sunshine             HSys = 'I' // Treindl
-	SunshineAlt          HSys = 'i' // Makransky
+	Azimuthal            HSys = 'H' // a.k.a Horizontal
+	Sunshine             HSys = 'I' // Makransky, solution Treindl
+	SunshineAlt          HSys = 'i' // Makransky, solution Makransky
 	Koch                 HSys = 'K'
 	PullenSD             HSys = 'L'
 	Morinus              HSys = 'M'
 	EqualAsc             HSys = 'N' // Equal houses, where cusp 1 = 0° Aries
-	Porphyrius           HSys = 'O' // Porphyry
+	Porphyrius           HSys = 'O' // a.k.a Porphyry
 	Placidus             HSys = 'P'
 	PullenSR             HSys = 'Q'
 	Regiomontanus        HSys = 'R'
 	Sripati              HSys = 'S'
-	PolichPage           HSys = 'T' // Topocentric
+	PolichPage           HSys = 'T' // a.k.a. Topocentric
 	KrusinskiPisaGoelzer HSys = 'U'
-	VehlowEqual          HSys = 'V' // Equal Vehlow
+	VehlowEqual          HSys = 'V' // Equal Vehlow (Asc in middle of house 1)
 	WholeSign            HSys = 'W'
-	AxialRotation        HSys = 'X'
+	AxialRotation        HSys = 'X' // a.k.a. Meridian
 	APCHouses            HSys = 'Y'
 )
 
