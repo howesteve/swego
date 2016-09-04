@@ -66,7 +66,6 @@ type HousesExFlags struct {
 }
 
 // HSys represents house system identifiers used in the C library.
-// It's assumed to be an upper case ASCII letter.
 type HSys byte
 
 // NewHSys validates the input and returns a HSys value if valid.
