@@ -53,6 +53,18 @@ func TestNewHSys(t *testing.T) {
 	}
 }
 
+func TestNewHSys_lowerToUpper(t *testing.T) {
+	got, ok := NewHSys('a')
+	if !ok {
+		t.Error("ok = false, want: true")
+	}
+
+	want := HSys('A')
+	if got != want {
+		t.Errorf("hsys = %c, want: %c", got, want)
+	}
+}
+
 func TestCalcFlags_Copy(t *testing.T) {
 	fl := new(CalcFlags)
 	fl.Flags = FlagSpeed

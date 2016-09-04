@@ -1,8 +1,6 @@
 // Package swego defines an interface for interfacing with the Swiss Ephemeris.
 package swego
 
-import "unicode"
-
 // CalType represents the calendar type used in julian date conversion.
 type CalType int
 
@@ -77,8 +75,10 @@ func NewHSys(char byte) (hsys HSys, ok bool) {
 		return HSys(char), true
 	}
 
-	// package unicode operates on runes
-	char = byte(unicode.ToUpper(rune(char)))
+	// It's trivial to convert lower case to upper case in ASCII.
+	if 'a' <= char && char <= 'z' {
+		char -= 'a' - 'A'
+	}
 
 	switch char {
 	case 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O',
