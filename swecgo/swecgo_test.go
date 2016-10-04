@@ -107,37 +107,37 @@ func TestCalc(t *testing.T) {
 		in   *swego.CalcFlags
 		want result
 	}{
-		{gWrapper.Calc,
+		{wrapper{}.Calc,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL},
 			result{[]float64{279.858461, .000229, .983331, .0, .0, .0}, 1}},
-		{gWrapper.CalcUT,
+		{wrapper{}.CalcUT,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL},
 			result{[]float64{279.859214, .000229, .983331, .0, .0, .0}, 1}},
-		{gWrapper.Calc,
+		{wrapper{}.Calc,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
 			result{[]float64{279.858461, .000230, .983331, .0, .0, .0}, 1}},
-		{gWrapper.CalcUT,
+		{wrapper{}.CalcUT,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL, FileNameJPL: swego.FnameDft2},
 			result{[]float64{279.859214, .000230, .983331, .0, .0, .0}, 1}},
-		{gWrapper.Calc,
+		{wrapper{}.Calc,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
 				TopoLoc: &swego.GeoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
 			result{[]float64{279.858426, -.000966, .983369, .0, .0, .0}, 32769}},
-		{gWrapper.CalcUT,
+		{wrapper{}.CalcUT,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
 				TopoLoc: &swego.GeoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
 			result{[]float64{279.859186, -.000966, .983369, .0, .0, .0}, 32769}},
-		{gWrapper.Calc,
+		{wrapper{}.Calc,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
 				SidMode: &swego.SidMode{},
 			},
 			result{[]float64{255.121938, .000229, .983331, .0, .0, .0}, 65601}},
-		{gWrapper.CalcUT,
+		{wrapper{}.CalcUT,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
 				SidMode: &swego.SidMode{},
@@ -171,8 +171,8 @@ func TestCalc_error(t *testing.T) {
 		fn  func(float64, swego.Planet, *swego.CalcFlags) ([]float64, int, error)
 		err string
 	}{
-		{gWrapper.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
-		{gWrapper.CalcUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapper{}.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapper{}.CalcUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
 	fl := &swego.CalcFlags{
@@ -214,25 +214,25 @@ func TestNodAps(t *testing.T) {
 		in   swego.NodApsMethod
 		want result
 	}{
-		{gWrapper.NodAps, swego.NodbitMean, result{
+		{wrapper{}.NodAps, swego.NodbitMean, result{
 			[]float64{125.067162, .0, .002461, .0, .0, .0},
 			[]float64{305.067162, .0, .002671, .0, .0, .0},
 			[]float64{83.408587, -3.425232, .002428, .0, .0, .0},
 			[]float64{263.408587, 3.425232, .002710, .0, .0, .0},
 		}},
-		{gWrapper.NodApsUT, swego.NodbitMean, result{
+		{wrapper{}.NodApsUT, swego.NodbitMean, result{
 			[]float64{125.067123, .0, .002461, .0, .0, .0},
 			[]float64{305.067123, .0, .002671, .0, .0, .0},
 			[]float64{83.408669, -3.425224, .002428, .0, .0, .0},
 			[]float64{263.408669, 3.425224, .002710, .0, .0, .0},
 		}},
-		{gWrapper.NodAps, swego.NodbitMean | swego.NodbitFoPoint, result{
+		{wrapper{}.NodAps, swego.NodbitMean | swego.NodbitFoPoint, result{
 			[]float64{125.067162, .0, .002461, .0, .0, .0},
 			[]float64{305.067162, .0, .002671, .0, .0, .0},
 			[]float64{83.408587, -3.425232, .002428, .0, .0, .0},
 			[]float64{263.408587, 3.425232, .000282, .0, .0, .0}, // different
 		}},
-		{gWrapper.NodApsUT, swego.NodbitMean | swego.NodbitFoPoint, result{
+		{wrapper{}.NodApsUT, swego.NodbitMean | swego.NodbitFoPoint, result{
 			[]float64{125.067123, .0, .002461, .0, .0, .0},
 			[]float64{305.067123, .0, .002671, .0, .0, .0},
 			[]float64{83.408669, -3.425224, .002428, .0, .0, .0},
@@ -278,8 +278,8 @@ func TestNodAps_error(t *testing.T) {
 		fn  func(float64, swego.Planet, *swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
 		err string
 	}{
-		{gWrapper.NodAps, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
-		{gWrapper.NodApsUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapper{}.NodAps, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapper{}.NodApsUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
 	fl := &swego.CalcFlags{
@@ -324,8 +324,8 @@ func TestGetAyanamsa(t *testing.T) {
 		fn   func(float64, *swego.SidMode) float64
 		want float64
 	}{
-		{gWrapper.GetAyanamsa, 24.740393},
-		{gWrapper.GetAyanamsaUT, 24.740393},
+		{wrapper{}.GetAyanamsa, 24.740393},
+		{wrapper{}.GetAyanamsaUT, 24.740393},
 	}
 
 	fl := &swego.SidMode{}
@@ -348,8 +348,8 @@ func TestGetAyanamsaEx(t *testing.T) {
 		fn   func(float64, *swego.AyanamsaExFlags) (float64, error)
 		want float64
 	}{
-		{gWrapper.GetAyanamsaEx, 24.740393},
-		{gWrapper.GetAyanamsaExUT, 24.740393},
+		{wrapper{}.GetAyanamsaEx, 24.740393},
+		{wrapper{}.GetAyanamsaExUT, 24.740393},
 	}
 
 	fl := &swego.AyanamsaExFlags{
