@@ -46,7 +46,7 @@ import (
 #cgo CFLAGS: -DTLSOFF=1
 
 int swex_supports_tls() {
-#ifdef TLSOFF
+#if defined(TLSOFF) && TLSOFF == 1
 	return 0;
 #else
 	return 1;
