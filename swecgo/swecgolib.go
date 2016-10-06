@@ -72,7 +72,7 @@ void swex_set_sid_mode(int32 sid_mode, double t0, double ayan_t0) {
 	}
 }
 
-void swex_set_jpl_file(const char *fname) {
+void swex_set_jpl_file(char *fname) {
 	if (strncmp(fname, swed.jplfnam, strlen(fname)) != 0) {
 		swe_set_jpl_file(fname);
 	}
