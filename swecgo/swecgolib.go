@@ -6,7 +6,7 @@ import (
 	"errors"
 	"unsafe"
 
-	"github.com/dwlnetnl/swego"
+	"github.com/astrotools/swego"
 )
 
 /*

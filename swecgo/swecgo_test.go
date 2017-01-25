@@ -5,7 +5,7 @@ package swecgo
 import (
 	"testing"
 
-	"github.com/dwlnetnl/swego"
+	"github.com/astrotools/swego"
 )
 
 func TestConstantCheck(t *testing.T) {

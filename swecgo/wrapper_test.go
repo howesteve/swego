@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/dwlnetnl/swego"
+	"github.com/astrotools/swego"
 )
 
 func inDelta(lhs, rhs, delta float64) bool {
@@ -83,6 +83,12 @@ func Test_wrapper_Calc(t *testing.T) {
 		want result
 	}{
 		{gWrapper.Calc,
+			nil,
+			result{[]float64{279.858461, .000229, .983331, .0, .0, .0}, 0}},
+		{gWrapper.CalcUT,
+			nil,
+			result{[]float64{279.859214, .000229, .983331, .0, .0, .0}, 2}},
+		{gWrapper.Calc,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL},
 			result{[]float64{279.858461, .000229, .983331, .0, .0, .0}, 1}},
 		{gWrapper.CalcUT,
@@ -107,17 +113,23 @@ func Test_wrapper_Calc(t *testing.T) {
 			},
 			result{[]float64{279.859186, -.000966, .983369, .0, .0, .0}, 32769}},
 		{gWrapper.Calc,
+			&swego.CalcFlags{Flags: swego.FlagEphJPL | swego.FlagSidereal},
+			result{[]float64{255.121938, .000229, .983331, .0, .0, .0}, 65601}},
+		{gWrapper.CalcUT,
+			&swego.CalcFlags{Flags: swego.FlagEphJPL | swego.FlagSidereal},
+			result{[]float64{255.122691, .000229, .983331, .0, .0, .0}, 65601}},
+		{gWrapper.Calc,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
-				SidMode: &swego.SidMode{},
+				SidMode: &swego.SidMode{Mode: 1},
 			},
-			result{[]float64{255.121938, .000229, .983331, .0, .0, .0}, 65601}},
+			result{[]float64{256.005296, .000229, .983331, .0, .0, .0}, 65601}},
 		{gWrapper.CalcUT,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
-				SidMode: &swego.SidMode{},
+				SidMode: &swego.SidMode{Mode: 1},
 			},
-			result{[]float64{255.122691, .000229, .983331, .0, .0, .0}, 65601}},
+			result{[]float64{256.006049, .000229, .983331, .0, .0, .0}, 65601}},
 	}
 
 	for _, c := range cases {
@@ -147,7 +159,7 @@ func Test_wrapper_Calc_error(t *testing.T) {
 		err string
 	}{
 		{gWrapper.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
-		{gWrapper.CalcUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{gWrapper.CalcUT, "swecgo: jd 100002682.057840 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
 	fl := &swego.CalcFlags{
@@ -158,12 +170,8 @@ func Test_wrapper_Calc_error(t *testing.T) {
 		Call(nil, func(_ swego.Interface) {
 			xx, cfl, err := c.fn(99999999., swego.Sun, fl)
 
-			if err == nil {
-				t.Fatal("err == nil")
-			}
-
 			if err.Error() != c.err {
-				t.Errorf("err = %q, want: %q", c.err, err)
+				t.Errorf("err = %q, want: %q", err, c.err)
 			}
 
 			if !reflect.DeepEqual(xx, make([]float64, 6)) {
@@ -254,7 +262,7 @@ func Test_wrapper_NodAps_error(t *testing.T) {
 		err string
 	}{
 		{gWrapper.NodAps, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
-		{gWrapper.NodApsUT, "swecgo: jd 100002561.779707 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{gWrapper.NodApsUT, "swecgo: jd 100002682.057840 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
 	fl := &swego.CalcFlags{
@@ -497,31 +505,32 @@ func Test_wrapper_JDUT1ToUTC(t *testing.T) {
 			t.Errorf("i = %d, want: 59", i)
 		}
 
-		if !inDelta(s, 59.645586, 1e-6) {
-			t.Errorf("s = %f ± 1e-6, want: 59.645586", s)
+		const want = 59.644500
+		if !inDelta(s, want, 1e-6) {
+			t.Errorf("s = %f ± 1e-6, want: %f", s, want)
 		}
 	})
 }
 
-func Test_wrapper_Houses(t *testing.T) {
-	t.Parallel()
+type housesTestInput struct {
+	geolat float64
+	hsys   swego.HSys
+	flags  *swego.HousesExFlags
+}
 
-	type input struct {
-		geolat float64
-		hsys   swego.HSys
-	}
+type housesTestResult struct {
+	cusps []float64
+	ascmc []float64
+	err   string
+}
 
-	type result struct {
-		cusps []float64
-		ascmc []float64
-		err   string
-	}
-
-	cases := []struct {
-		in   input
-		want result
-	}{
-		{input{52.083333, swego.Placidus}, result{
+var housesTests = []struct {
+	in   housesTestInput
+	want housesTestResult
+}{
+	{
+		housesTestInput{52.083333, swego.Placidus, nil},
+		housesTestResult{
 			[]float64{0,
 				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
 				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
@@ -533,7 +542,9 @@ func Test_wrapper_Houses(t *testing.T) {
 			},
 			"",
 		}},
-		{input{82.083333, swego.Koch}, result{
+	{
+		housesTestInput{82.083333, swego.Koch, nil},
+		housesTestResult{
 			[]float64{0,
 				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
 				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
@@ -545,7 +556,9 @@ func Test_wrapper_Houses(t *testing.T) {
 			},
 			"swecgo: error calculating houses",
 		}},
-		{input{52.083333, swego.Gauquelin}, result{
+	{
+		housesTestInput{52.083333, swego.Gauquelin, nil},
+		housesTestResult{
 			[]float64{0,
 				190.553653, 183.704634, 176.258623, 168.152982, 159.330891, 149.746713,
 				139.373115, 128.213369, 116.328153, 103.886819, 91.215325, 78.741976,
@@ -561,9 +574,28 @@ func Test_wrapper_Houses(t *testing.T) {
 			},
 			"",
 		}},
-		// SunshineAlt is the only lower case house system letter.
-		// It is introduced in Swiss Ephemeris version 2.05.
-		{input{52.083333, swego.SunshineAlt}, result{
+	{
+		housesTestInput{52.083333, swego.Placidus, &swego.HousesExFlags{
+			Flags:   flgSidereal,
+			SidMode: &swego.SidMode{},
+		}},
+		housesTestResult{
+			[]float64{0,
+				165.817130, 190.801765, 222.086464, 259.150296, 294.636593, 323.416459,
+				345.817130, 10.801765, 42.086464, 79.150296, 114.636593, 143.416459,
+			},
+			[]float64{
+				165.817130, 79.150296, 105.080915, 359.569965,
+				171.630740, 189.998138, 167.539394, 9.998138,
+				.0, .0,
+			},
+			"",
+		}},
+	// SunshineAlt is the only lower case house system letter.
+	// It is introduced in Swiss Ephemeris version 2.05.
+	{
+		housesTestInput{52.083333, swego.SunshineAlt, nil},
+		housesTestResult{
 			[]float64{0,
 				190.553653, 216.974402, 246.972073, 283.886819, 318.522699, 345.395439,
 				10.553653, 26.204261, 52.666679, 103.886819, 151.275154, 175.374467,
@@ -571,13 +603,20 @@ func Test_wrapper_Houses(t *testing.T) {
 			[]float64{
 				190.553653, 103.886819, 105.080915, 24.306488,
 				196.367263, 214.734661, 192.275917, 34.734661,
-				.0, .0,
+				.0, -23.071122,
 			},
 			"",
 		}},
-	}
+}
 
-	for _, c := range cases {
+func Test_wrapper_Houses(t *testing.T) {
+	t.Parallel()
+
+	for _, c := range housesTests {
+		if c.in.flags != nil {
+			continue
+		}
+
 		Call(nil, func(swe swego.Interface) {
 			cusps, ascmc, err := swe.Houses(2451544.5, c.in.geolat, 5.116667, c.in.hsys)
 
@@ -587,12 +626,12 @@ func Test_wrapper_Houses(t *testing.T) {
 			}
 
 			if !inDeltaSlice(cusps, c.want.cusps, 1e-6) {
-				t.Errorf("(%f, %c) cusps = %v, want: %v",
+				t.Errorf("(%f, %c) cusps:\n\t%v\nwant:\n\t%v",
 					c.in.geolat, c.in.hsys, cusps, c.want.cusps)
 			}
 
 			if !inDeltaSlice(ascmc, c.want.ascmc, 1e-6) {
-				t.Errorf("(%f, %c) ascmc = %v, want: %v",
+				t.Errorf("(%f, %c) ascmc:\n\t%v\nwant:\n\t%v",
 					c.in.geolat, c.in.hsys, ascmc, c.want.ascmc)
 			}
 		})
@@ -602,95 +641,7 @@ func Test_wrapper_Houses(t *testing.T) {
 func Test_wrapper_HousesEx(t *testing.T) {
 	t.Parallel()
 
-	type input struct {
-		geolat float64
-		hsys   swego.HSys
-		flags  *swego.HousesExFlags
-	}
-
-	type result struct {
-		cusps []float64
-		ascmc []float64
-		err   string
-	}
-
-	cases := []struct {
-		in   input
-		want result
-	}{
-		{input{52.083333, swego.Placidus, &swego.HousesExFlags{}}, result{
-			[]float64{0,
-				190.553653, 215.538288, 246.822987, 283.886819, 319.373115, 348.152982,
-				10.553653, 35.538288, 66.822987, 103.886819, 139.373115, 168.152982,
-			},
-			[]float64{
-				190.553653, 103.886819, 105.080915, 24.306488,
-				196.367263, 214.734661, 192.275917, 34.734661,
-				.0, .0,
-			},
-			"",
-		}},
-		{input{82.083333, swego.Koch, &swego.HousesExFlags{}}, result{
-			[]float64{0,
-				183.972931, 217.277560, 250.582190, 283.886819, 310.582190, 337.277560,
-				3.972931, 37.277560, 70.582190, 103.886819, 130.582190, 157.277560,
-			},
-			[]float64{
-				183.972931, 103.886819, 105.080915, 17.393326,
-				196.367263, 352.493044, 195.452718, 172.493044,
-				.0, .0,
-			},
-			"swecgo: error calculating houses",
-		}},
-		{input{52.083333, swego.Gauquelin, &swego.HousesExFlags{}}, result{
-			[]float64{0,
-				190.553653, 183.704634, 176.258623, 168.152982, 159.330891, 149.746713,
-				139.373115, 128.213369, 116.328153, 103.886819, 91.215325, 78.741976,
-				66.822987, 55.634583, 45.214174, 35.538288, 26.565986, 18.252908,
-				10.553653, 3.704634, 356.258623, 348.152982, 339.330891, 329.746713,
-				319.373115, 308.213369, 296.328153, 283.886819, 271.215325, 258.741976,
-				246.822987, 235.634583, 225.214174, 215.538288, 206.565986, 198.252908,
-			},
-			[]float64{
-				190.553653, 103.886819, 105.080915, 24.306488,
-				196.367263, 214.734661, 192.275917, 34.734661,
-				.0, .0,
-			},
-			"",
-		}},
-		{input{52.083333, swego.Placidus, &swego.HousesExFlags{
-			Flags:   flgSidereal,
-			SidMode: &swego.SidMode{},
-		}},
-			result{
-				[]float64{0,
-					165.817130, 190.801765, 222.086464, 259.150296, 294.636593, 323.416459,
-					345.817130, 10.801765, 42.086464, 79.150296, 114.636593, 143.416459,
-				},
-				[]float64{
-					165.817130, 79.150296, 105.080915, 359.569965,
-					171.630740, 189.998138, 167.539394, 9.998138,
-					.0, .0,
-				},
-				"",
-			}},
-		// SunshineAlt is the only lower case house system letter.
-		// It is introduced in Swiss Ephemeris version 2.05.
-		{input{52.083333, swego.SunshineAlt, &swego.HousesExFlags{}}, result{
-			[]float64{0,
-				190.553653, 216.974402, 246.972073, 283.886819, 318.522699, 345.395439,
-				10.553653, 26.204261, 52.666679, 103.886819, 151.275154, 175.374467,
-			},
-			[]float64{
-				190.553653, 103.886819, 105.080915, 24.306488,
-				196.367263, 214.734661, 192.275917, 34.734661,
-				.0, .0,
-			},
-			"",
-		}},
-	}
-
-	for _, c := range cases {
+	for _, c := range housesTests {
 		Call(nil, func(swe swego.Interface) {
 			cusps, ascmc, err := swe.HousesEx(2451544.5, c.in.flags, c.in.geolat,
 				5.116667, c.in.hsys)
@@ -701,12 +652,12 @@ func Test_wrapper_HousesEx(t *testing.T) {
 			}
 
 			if !inDeltaSlice(cusps, c.want.cusps, 1e-6) {
-				t.Errorf("(%f, %c) cusps = %v, want: %v",
+				t.Errorf("(%f, %c) cusps:\n\t%v\nwant:\n\t%v",
 					c.in.geolat, c.in.hsys, cusps, c.want.cusps)
 			}
 
 			if !inDeltaSlice(ascmc, c.want.ascmc, 1e-6) {
-				t.Errorf("(%f, %c) ascmc = %v, want: %v",
+				t.Errorf("(%f, %c) ascmc:\n\t%v\nwant:\n\t%v",
 					c.in.geolat, c.in.hsys, ascmc, c.want.ascmc)
 			}
 		})
@@ -797,12 +748,12 @@ func Test_wrapper_HousesArmc(t *testing.T) {
 			}
 
 			if !inDeltaSlice(cusps, c.want.cusps, 1e-6) {
-				t.Errorf("(%f, %c) cusps = %v, want: %v",
+				t.Errorf("(%f, %c) cusps:\n\t%v\nwant:\n\t%v",
 					c.in.geolat, c.in.hsys, cusps, c.want.cusps)
 			}
 
 			if !inDeltaSlice(ascmc, c.want.ascmc, 1e-6) {
-				t.Errorf("(%f, %c) ascmc = %v, want: %v",
+				t.Errorf("(%f, %c) ascmc:\n\t%v\nwant:\n\t%v",
 					c.in.geolat, c.in.hsys, ascmc, c.want.ascmc)
 			}
 		})
@@ -831,7 +782,7 @@ func Test_wrapper_HousePos(t *testing.T) {
 		{input{52.083333, swego.Gauquelin}, result{20.934023, ""}},
 		// SunshineAlt is the only lower case house system letter.
 		// It is introduced in Swiss Ephemeris version 2.05.
-		{input{52.083333, swego.SunshineAlt}, result{6.509577, ""}},
+		{input{52.083333, swego.SunshineAlt}, result{4.597296, ""}},
 	}
 	for _, c := range cases {
 		Call(nil, func(swe swego.Interface) {

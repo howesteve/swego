@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/dwlnetnl/swego"
+	"github.com/astrotools/swego"
 )
 
 // Call calls fn within an initialized execution context. The initialization of

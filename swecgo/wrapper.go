@@ -1,6 +1,6 @@
 package swecgo
 
-import "github.com/dwlnetnl/swego"
+import "github.com/astrotools/swego"
 
 type wrapper struct{}
 
@@ -18,13 +18,34 @@ func (*wrapper) SetPath(ephepath string) { setEphePath(ephepath) }
 // Close implements swego.Interface.
 func (*wrapper) Close() { closeEphemeris() }
 
-func setCalcFlagsState(fl *swego.CalcFlags) {
+func setCalcFlagsState(fl *swego.CalcFlags) int32 {
+	if fl == nil {
+		return 0
+	}
+
 	if (fl.Flags & flgTopo) == flgTopo {
-		setTopo(fl.TopoLoc.Long, fl.TopoLoc.Lat, fl.TopoLoc.Alt)
+		var lng, lat, alt float64
+
+		if fl.TopoLoc != nil {
+			lng = fl.TopoLoc.Long
+			lat = fl.TopoLoc.Lat
+			alt = fl.TopoLoc.Alt
+		}
+
+		setTopo(lng, lat, alt)
 	}
 
 	if (fl.Flags & flgSidereal) == flgSidereal {
-		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
+		var mode swego.Ayanamsa
+		var t0, ayanT0 float64
+
+		if fl.SidMode != nil {
+			mode = fl.SidMode.Mode
+			t0 = fl.SidMode.T0
+			ayanT0 = fl.SidMode.AyanT0
+		}
+
+		setSidMode(mode, t0, ayanT0)
 	}
 
 	if fl.FileNameJPL != "" {
@@ -32,6 +53,7 @@ func setCalcFlagsState(fl *swego.CalcFlags) {
 	}
 
 	setFileNameJPL(fl.FileNameJPL)
+	return fl.Flags
 }
 
 // PlanetName implements swego.Interface.
@@ -39,26 +61,26 @@ func (*wrapper) PlanetName(pl swego.Planet) string { return planetName(pl) }
 
 // Calc implements swego.Interface.
 func (*wrapper) Calc(et float64, pl swego.Planet, fl *swego.CalcFlags) ([]float64, int, error) {
-	setCalcFlagsState(fl)
-	return calc(et, pl, fl.Flags)
+	flags := setCalcFlagsState(fl)
+	return calc(et, pl, flags)
 }
 
 // CalcUT implements swego.Interface.
 func (*wrapper) CalcUT(ut float64, pl swego.Planet, fl *swego.CalcFlags) ([]float64, int, error) {
-	setCalcFlagsState(fl)
-	return calcUT(ut, pl, fl.Flags)
+	flags := setCalcFlagsState(fl)
+	return calcUT(ut, pl, flags)
 }
 
 // NodAps implements swego.Interface.
 func (*wrapper) NodAps(et float64, pl swego.Planet, fl *swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
-	setCalcFlagsState(fl)
-	return nodAps(et, pl, fl.Flags, m)
+	flags := setCalcFlagsState(fl)
+	return nodAps(et, pl, flags, m)
 }
 
 // NodApsUT implements swego.Interface.
 func (*wrapper) NodApsUT(ut float64, pl swego.Planet, fl *swego.CalcFlags, m swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error) {
-	setCalcFlagsState(fl)
-	return nodApsUT(ut, pl, fl.Flags, m)
+	flags := setCalcFlagsState(fl)
+	return nodApsUT(ut, pl, flags, m)
 }
 
 // GetAyanamsa implements swego.Interface.
@@ -122,11 +144,15 @@ func (*wrapper) Houses(ut, geolat, geolon float64, hsys swego.HSys) ([]float64, 
 
 // HousesEx implements swego.Interface.
 func (*wrapper) HousesEx(ut float64, fl *swego.HousesExFlags, geolat, geolon float64, hsys swego.HSys) ([]float64, []float64, error) {
-	if (fl.Flags & flgSidereal) == flgSidereal {
-		setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
+	var flags int32
+	if fl != nil {
+		flags = fl.Flags
+		if (flags & flgSidereal) == flgSidereal {
+			setSidMode(fl.SidMode.Mode, fl.SidMode.T0, fl.SidMode.AyanT0)
+		}
 	}
 
-	return housesEx(ut, fl.Flags, geolat, geolon, hsys)
+	return housesEx(ut, flags, geolat, geolon, hsys)
 }
 
 // HousesARMC implements swego.Interface.
