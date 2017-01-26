@@ -164,10 +164,10 @@ func Test_wrapper_Calc_error(t *testing.T) {
 
 	cases := []struct {
 		fn  func(float64, swego.Planet, *swego.CalcFlags) ([]float64, int, error)
-		err string
+		err swego.Error
 	}{
-		{wrapperPtr.Calc, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
-		{wrapperPtr.CalcUT, "swecgo: jd 100002682.057840 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapperPtr.Calc, "jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapperPtr.CalcUT, "jd 100002682.057840 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
 	fl := &swego.CalcFlags{
@@ -179,8 +179,7 @@ func Test_wrapper_Calc_error(t *testing.T) {
 			swe.SetPath(DefaultPath)
 
 			xx, cfl, err := c.fn(99999999., swego.Sun, fl)
-
-			if err.Error() != c.err {
+			if err != c.err {
 				t.Errorf("err = %q, want: %q", err, c.err)
 			}
 
@@ -270,10 +269,10 @@ func Test_wrapper_NodAps_error(t *testing.T) {
 
 	cases := []struct {
 		fn  func(float64, swego.Planet, *swego.CalcFlags, swego.NodApsMethod) (nasc, ndsc, peri, aphe []float64, err error)
-		err string
+		err swego.Error
 	}{
-		{wrapperPtr.NodAps, "swecgo: jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
-		{wrapperPtr.NodApsUT, "swecgo: jd 100002682.057840 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapperPtr.NodAps, "jd 99999999.000000 outside JPL eph. range -3027215.50 .. 7930192.50;"},
+		{wrapperPtr.NodApsUT, "jd 100002682.057840 outside JPL eph. range -3027215.50 .. 7930192.50;"},
 	}
 
 	fl := &swego.CalcFlags{
@@ -285,12 +284,7 @@ func Test_wrapper_NodAps_error(t *testing.T) {
 			swe.SetPath(DefaultPath)
 
 			nasc, ndsc, peri, aphe, err := c.fn(99999999., swego.Moon, fl, swego.NodbitMean)
-
-			if err == nil {
-				t.Fatalf("err = nil, want: %v", c.err)
-			}
-
-			if err.Error() != c.err {
+			if err != c.err {
 				t.Errorf("err = %q, want: %q", err, c.err)
 			}
 
@@ -544,7 +538,7 @@ type housesTestInput struct {
 type housesTestResult struct {
 	cusps []float64
 	ascmc []float64
-	err   string
+	err   error
 }
 
 var housesTests = []struct {
@@ -563,7 +557,7 @@ var housesTests = []struct {
 				196.367263, 214.734661, 192.275917, 34.734661,
 				.0, .0,
 			},
-			"",
+			nil,
 		}},
 	{
 		housesTestInput{82.083333, swego.Koch, nil},
@@ -577,7 +571,7 @@ var housesTests = []struct {
 				196.367263, 352.493044, 195.452718, 172.493044,
 				.0, .0,
 			},
-			"swecgo: error calculating houses",
+			swego.Error(""),
 		}},
 	{
 		housesTestInput{52.083333, swego.Gauquelin, nil},
@@ -595,7 +589,7 @@ var housesTests = []struct {
 				196.367263, 214.734661, 192.275917, 34.734661,
 				.0, .0,
 			},
-			"",
+			nil,
 		}},
 	{
 		housesTestInput{52.083333, swego.Placidus, &swego.HousesExFlags{
@@ -612,7 +606,7 @@ var housesTests = []struct {
 				171.630740, 189.998138, 167.539394, 9.998138,
 				.0, .0,
 			},
-			"",
+			nil,
 		}},
 	// SunshineAlt is the only lower case house system letter.
 	// It is introduced in Swiss Ephemeris version 2.05.
@@ -628,7 +622,7 @@ var housesTests = []struct {
 				196.367263, 214.734661, 192.275917, 34.734661,
 				.0, -23.071122,
 			},
-			"",
+			nil,
 		}},
 }
 
@@ -644,7 +638,7 @@ func Test_wrapper_Houses(t *testing.T) {
 			swe.SetPath(DefaultPath)
 
 			cusps, ascmc, err := swe.Houses(2451544.5, c.in.geolat, 5.116667, c.in.hsys)
-			if c.want.err != "" && c.want.err != err.Error() {
+			if err != c.want.err {
 				t.Fatalf("(%f, %c) err = %q, want: %q",
 					c.in.geolat, c.in.hsys, err, c.want.err)
 			}
@@ -670,7 +664,7 @@ func Test_wrapper_HousesEx(t *testing.T) {
 			swe.SetPath(DefaultPath)
 
 			cusps, ascmc, err := swe.HousesEx(2451544.5, c.in.flags, c.in.geolat, 5.116667, c.in.hsys)
-			if c.want.err != "" && c.want.err != err.Error() {
+			if err != c.want.err {
 				t.Fatalf("(%f, %c) err = %q, want: %q",
 					c.in.geolat, c.in.hsys, err, c.want.err)
 			}
@@ -699,7 +693,7 @@ func Test_wrapper_HousesArmc(t *testing.T) {
 	type result struct {
 		cusps []float64
 		ascmc []float64
-		err   string
+		err   error
 	}
 
 	cases := []struct {
@@ -716,7 +710,7 @@ func Test_wrapper_HousesArmc(t *testing.T) {
 				196.367450, 214.737779, 192.275825, 34.737779,
 				.0, .0,
 			},
-			"",
+			nil,
 		}},
 		{input{82.083333, swego.Koch}, result{
 			[]float64{0,
@@ -728,7 +722,7 @@ func Test_wrapper_HousesArmc(t *testing.T) {
 				196.367450, 352.493777, 195.452830, 172.493777,
 				.0, .0,
 			},
-			"swecgo: error calculating houses",
+			swego.Error(""),
 		}},
 		{input{52.083333, swego.Gauquelin}, result{
 			[]float64{0,
@@ -744,7 +738,7 @@ func Test_wrapper_HousesArmc(t *testing.T) {
 				196.367450, 214.737779, 192.275825, 34.737779,
 				.0, .0,
 			},
-			"",
+			nil,
 		}},
 		// SunshineAlt is the only lower case house system letter.
 		// It is introduced in Swiss Ephemeris version 2.05.
@@ -758,7 +752,7 @@ func Test_wrapper_HousesArmc(t *testing.T) {
 				196.367450, 214.737779, 192.275825, 34.737779,
 				.0, .0,
 			},
-			"",
+			nil,
 		}},
 	}
 
@@ -767,7 +761,7 @@ func Test_wrapper_HousesArmc(t *testing.T) {
 			swe.SetPath(DefaultPath)
 
 			cusps, ascmc, err := swe.HousesARMC(105.080916, c.in.geolat, 23.439279, c.in.hsys)
-			if c.want.err != "" && c.want.err != err.Error() {
+			if err != c.want.err {
 				t.Fatalf("(%f, %c) err = %q, want: %q",
 					c.in.geolat, c.in.hsys, err, c.want.err)
 			}

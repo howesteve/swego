@@ -3,7 +3,6 @@
 package swecgo
 
 import (
-	"errors"
 	"unsafe"
 
 	"github.com/astrotools/swego"
@@ -94,7 +93,7 @@ func withError(fn func(err *C.char) bool) error {
 	var _err [C.AS_MAXCH]C.char
 
 	if fn(&_err[0]) {
-		return errors.New(errPrefix + C.GoString(&_err[0]))
+		return swego.Error(C.GoString(&_err[0]))
 	}
 
 	return nil
@@ -342,7 +341,7 @@ func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_, _ []float64, err 
 	_ascmc := (*C.double)(unsafe.Pointer(&ascmc[0]))
 
 	if C.ERR == fn(_lat, _hsys, _cusps, _ascmc) {
-		err = errors.New(errPrefix + "error calculating houses")
+		err = swego.Error("")
 	}
 
 	// The house system letters are practically constants. If those are changed,

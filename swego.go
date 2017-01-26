@@ -1,6 +1,13 @@
 // Package swego defines an interface for interfacing with the Swiss Ephemeris.
 package swego
 
+// Error represents an error reported by the Swiss Ephemeris library.
+type Error string
+
+func (e Error) Error() string {
+	return "swisseph: " + string(e)
+}
+
 // CalType represents the calendar type used in julian date conversion.
 type CalType int
 
