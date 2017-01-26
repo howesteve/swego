@@ -93,8 +93,6 @@ func NewHSys(char byte) (hsys HSys, ok bool) {
 type Interface interface {
 	// Version returns the version of the Swiss Ephemeris.
 	Version() string
-	// GetLibraryPath returns the file system path of the executable.
-	GetLibraryPath() string
 
 	// SetPath opens the ephemeris and sets the data path.
 	SetPath(path string)
@@ -214,5 +212,5 @@ type Interface interface {
 
 // An Invoker invokes a function in an initialized execution context.
 type Invoker interface {
-	Invoke(fn func(Interface)) error
+	Invoke(fn func(swe Interface)) error
 }

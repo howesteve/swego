@@ -112,12 +112,6 @@ func setEphePath(path string) {
 	C.free(unsafe.Pointer(_path))
 }
 
-func getLibraryPath() string {
-	var _libpath [C.AS_MAXCH]C.char
-	C.swe_get_library_path(&_libpath[0])
-	return C.GoString(&_libpath[0])
-}
-
 func setTopo(lng, lat, alt float64) {
 	C.swe_set_topo(C.double(lng), C.double(lat), C.double(alt))
 }
