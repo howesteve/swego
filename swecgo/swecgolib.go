@@ -44,47 +44,20 @@ import (
 // Disable thread local storage in library.
 #cgo CFLAGS: -DTLSOFF=1
 
-int swex_supports_tls() {
-#if defined(TLSOFF) && TLSOFF == 1
-	return 0;
-#else
-	return 1;
-#endif
-}
-
 // ----------
 
 #cgo CFLAGS: -w
 
-#include <stdlib.h>
-#include <string.h>
 #include "swephexp.h"
 #include "sweph.h"
-
-void swex_set_sid_mode(int32 sid_mode, double t0, double ayan_t0) {
-	if (swed.ayana_is_set == FALSE
-		|| swed.sidd.sid_mode != sid_mode
-		|| swed.sidd.ayan_t0 != ayan_t0
-		|| swed.sidd.t0 != t0
-	) {
-		swe_set_sid_mode(sid_mode, t0, ayan_t0);
-	}
-}
-
-void swex_set_jpl_file(char *fname) {
-	if (strncmp(fname, swed.jplfnam, strlen(fname)) != 0) {
-		swe_set_jpl_file(fname);
-	}
-}
+#include "swex.h"
 
 */
 import "C"
 
 func supportsTLS() bool {
-	return C.swex_supports_tls() == 1
+	return bool(C.swex_supports_tls())
 }
-
-const errPrefix = "swecgo: "
 
 // withError calls fn with a pre allocated error variable that can passed to a
 // function in the C library. The code block must return true if an error is
@@ -112,11 +85,11 @@ func setEphePath(path string) {
 }
 
 func setTopo(lng, lat, alt float64) {
-	C.swe_set_topo(C.double(lng), C.double(lat), C.double(alt))
+	C.swex_set_topo(C.double(lng), C.double(lat), C.double(alt))
 }
 
 func setSidMode(mode swego.Ayanamsa, t0, ayanT0 float64) {
-	C.swex_set_sid_mode(C.int32(mode), C.double(t0), C.double(ayanT0))
+	C.swex_set_sid_mode(C.int32_t(mode), C.double(t0), C.double(ayanT0))
 }
 
 func setFileNameJPL(name string) {
