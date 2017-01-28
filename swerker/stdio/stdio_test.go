@@ -34,6 +34,8 @@ func newTestWorker(funcs worker.Funcs, call callFunc, exit exitFunc) newFunc {
 	}
 }
 
+const workerPath = "/path/to/swerker-stdio"
+
 func TestNew(t *testing.T) {
 	dataPaths := []string{"/path/to/longfiles", "/path/to/files"}
 	funcs := worker.Funcs{"rpc_funcs", "swe_set_ephe_path"}
@@ -62,9 +64,7 @@ func TestNew(t *testing.T) {
 		return nil
 	})
 
-	const path = "/path/to/swedenw-stdio"
-
-	d, err := New(path, 2, DataPath(dataPaths...))
+	d, err := New(workerPath, NumWorkers(2), DataPath(dataPaths...))
 	if err != nil {
 		t.Fatalf("err = %v, want: nil", err)
 	}
@@ -73,8 +73,8 @@ func TestNew(t *testing.T) {
 		t.Fatal("d == nil")
 	}
 
-	if got := d.Path(); got != path {
-		t.Errorf("Path() = %q, want: %q", got, path)
+	if got := d.Path(); got != workerPath {
+		t.Errorf("Path() = %q, want: %q", got, workerPath)
 	}
 
 	if got := d.DataPaths(); !reflect.DeepEqual(got, dataPaths) {
@@ -105,7 +105,7 @@ func TestClose(t *testing.T) {
 		return nil
 	})
 
-	d, err := New("/path/to/swedenw-stdio", 1)
+	d, err := New(workerPath, NumWorkers(1))
 	if err != nil {
 		t.Fatalf("err = %v, want: nil", err)
 	}
@@ -156,7 +156,7 @@ func TestDispatch(t *testing.T) {
 		return nil
 	})
 
-	d, err := New("/path/to/swedenw-stdio", 1)
+	d, err := New(workerPath, NumWorkers(1))
 	if err != nil {
 		t.Fatalf("err = %v, want: nil", err)
 	}
@@ -196,9 +196,8 @@ func TestDispatch(t *testing.T) {
 }
 
 func TestCrash(t *testing.T) {
-	const path = "/path/to/swedenw-stdio"
 	funcs := worker.Funcs{"rpc_funcs", "test_crash"}
-	exitErr := &exec.Error{Name: path, Err: errors.New("some exit error")}
+	exitErr := &exec.Error{Name: workerPath, Err: errors.New("some exit error")}
 
 	defer func() { newWorker = worker.New }()
 	newWorker = newTestWorker(funcs, func(c *swerker.Call) (msgp.Raw, bool, error) {
@@ -224,7 +223,7 @@ func TestCrash(t *testing.T) {
 		return exitErr
 	})
 
-	d, err := New(path, 2, OnExitError(func(err error) {
+	d, err := New(workerPath, NumWorkers(2), OnExitError(func(err error) {
 		if err != exitErr {
 			t.Errorf("err = %v, want: %#v", err, exitErr)
 		}
@@ -286,7 +285,7 @@ func TestVersion(t *testing.T) {
 		return nil
 	})
 
-	v, err := Version("/path/to/swedenw-stdio")
+	v, err := Version(workerPath)
 	if err != nil {
 		t.Fatalf("err = %v, want: nil", err)
 	}

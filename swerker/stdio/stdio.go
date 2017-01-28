@@ -18,6 +18,7 @@ import (
 
 // Dispatcher runs a set of swerker-stdio worker processes.
 type Dispatcher struct {
+	procs     int
 	path      string
 	data      string
 	workers   []worker.Worker
@@ -45,6 +46,15 @@ type result struct {
 // An Option configures an optional Dispatcher parameter.
 type Option func(*Dispatcher)
 
+// NumWorkers configures the number of processes are started by Dispatcher.
+// If num is 0, the number of logical processors usable by the current process
+// is used.
+func NumWorkers(num int) Option {
+	return func(d *Dispatcher) {
+		d.procs = num
+	}
+}
+
 // OnNewError configures a Dispatcher to call fn when a worker could not be
 // restarted.
 func OnNewError(fn func(err error)) Option {
@@ -65,16 +75,11 @@ var newWorker = worker.New // for testing
 
 // New returns a Dispatcher that interfaces via swerker-stdio with the
 // Swiss Ephemeris. As it takes the file system path to the binary and the
-// number of instances of the program as arguments. If num is 0, the number of
+// number of instances of the program as arguments. By default the number of
 // logical processors usable by the current process is used.
-func New(path string, num int, opts ...Option) (d *Dispatcher, err error) {
-	if num == 0 {
-		num = runtime.NumCPU()
-	}
-
+func New(path string, opts ...Option) (d *Dispatcher, err error) {
 	d = &Dispatcher{
 		path:     path,
-		workers:  make([]worker.Worker, num),
 		queue:    make(chan task),
 		crashed:  make(chan worker.Worker),
 		workDone: make(chan struct{}),
@@ -85,13 +90,18 @@ func New(path string, num int, opts ...Option) (d *Dispatcher, err error) {
 		opt(d)
 	}
 
+	if d.procs == 0 {
+		d.procs = runtime.NumCPU()
+	}
+
 	defer func() {
 		if err != nil {
 			d.Close()
 		}
 	}()
 
-	for i := 0; i < num; i++ {
+	d.workers = make([]worker.Worker, d.procs)
+	for i := 0; i < d.procs; i++ {
 		w, funcs, err := d.newWorker()
 		if err != nil {
 			return nil, err

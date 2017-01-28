@@ -1,4 +1,4 @@
-// Package worker provides an interface to the swedenw-stdio worker binary.
+// Package worker provides an interface to the swerker-stdio worker binary.
 package worker
 
 import (
@@ -11,7 +11,7 @@ import (
 	"github.com/tinylib/msgp/msgp"
 )
 
-// Worker runs and interacts with a swedenw-stdio subprocess.
+// Worker runs and interacts with a swerker-stdio subprocess.
 type Worker interface {
 	Call(c *swerker.Call) (data msgp.Raw, crashed bool, err error)
 	Exit() error
@@ -28,7 +28,7 @@ type worker struct {
 	waited  chan struct{}
 }
 
-// New runs the swedenw-stdio binary found at the specified path as process and
+// New runs the swerker-stdio binary found at the specified path as process and
 // returns the RPC functions it exposes.
 func New(path string) (Worker, Funcs, error) {
 	w := &worker{
@@ -108,7 +108,7 @@ type NoFuncsError struct {
 }
 
 func (e *NoFuncsError) Error() string {
-	return "no initial funcs"
+	return "worker: no initial funcs"
 }
 
 func (w *worker) unmarshalFuncs() (Funcs, error) {
@@ -132,7 +132,7 @@ func (w *worker) unmarshalFuncs() (Funcs, error) {
 
 // ErrProcessExited is returned if a Call is made to a worker that has a
 // terminated subprocess.
-var ErrProcessExited = errors.New("process has exited")
+var ErrProcessExited = errors.New("worker: process has exited")
 
 // UnexpectedExitError is returned when the subprocess is unexpeced exited.
 type UnexpectedExitError struct {
@@ -141,7 +141,7 @@ type UnexpectedExitError struct {
 }
 
 func (e *UnexpectedExitError) Error() string {
-	return "unexpected exit"
+	return "worker: unexpected exit"
 }
 
 // Call executes function call c in the worker subprocess.

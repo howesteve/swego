@@ -146,7 +146,7 @@ err = "";
 ```
 
 ## Implementation specifics
-### swedenw-stdio
+### swerker-stdio
 This program is designed to run as subprocess of the client. It will read
 requests from stdin and write responses to stdout. The process will exit when a
 newline (`\n`) is read from stdin. Each request and response is framed in a

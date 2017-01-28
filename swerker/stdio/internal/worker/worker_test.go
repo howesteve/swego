@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	useWorker  = flag.Bool("worker", false, "Test against actual swedenw-stdio binary.")
-	workerPath = flag.String("worker.path", "../cmd/swerker/swerker-stdio", "Path to swerker-stdio binary.")
+	useWorker  = flag.Bool("worker", false, "Test against actual swerker-stdio binary.")
+	workerPath = flag.String("worker.path", "../../../../cmd/swerker/swerker-stdio", "Path to swerker-stdio binary.")
 )
 
 func TestNoFuncs(t *testing.T) {
