@@ -203,7 +203,3 @@ const (
 	AxialRotation        HSys = 'X' // a.k.a. Meridian
 	APCHouses            HSys = 'Y'
 )
-
-// ResetDeltaT resets the user defined ΔT value inside the Swiss Ephemeris so
-// the ΔT values will be calculated by the library again.
-const ResetDeltaT = -1e-10

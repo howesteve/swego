@@ -51,12 +51,23 @@ import (
 #include "swephexp.h"
 #include "sweph.h"
 #include "swex.h"
+#include "sweversion.h"
+
+double swecgo_deltat_automatic() {
+	return SE_DELTAT_AUTOMATIC;
+}
 
 */
 import "C"
 
-func supportsTLS() bool {
-	return bool(C.swex_supports_tls())
+func checkLibrary() {
+	if C.swex_supports_tls() {
+		panic("swecgo: Thread Local Storage (TLS) is not supported")
+	}
+
+	if resetDeltaT != C.swecgo_deltat_automatic() {
+		panic("swecgo: SE_DELTAT_AUTOMATIC mismatch")
+	}
 }
 
 // withError calls fn with a pre allocated error variable that can passed to a
@@ -72,16 +83,32 @@ func withError(fn func(err *C.char) bool) error {
 	return nil
 }
 
-// Version constant contains the current Swiss Ephemeris version.
-const Version = C.SE_VERSION
+// Swiss Ephemeris version constants.
+const (
+	Version      = C.SE_VERSION
+	VersionMajor = C.SWEX_VERSION_MAJOR
+	VersionMinor = C.SWEX_VERSION_MINOR
+	VersionPatch = C.SWEX_VERSION_PATCH
+)
 
 // DefaultPath is the default ephemeris path defined by the library.
 const DefaultPath = C.SE_EPHE_PATH
+
+const (
+	flgTopo     = C.SEFLG_TOPOCTR
+	flgSidereal = C.SEFLG_SIDEREAL
+)
 
 func setEphePath(path string) {
 	_path := C.CString(path)
 	C.swe_set_ephe_path(_path)
 	C.free(unsafe.Pointer(_path))
+}
+
+func setJPLFile(name string) {
+	_name := C.CString(name)
+	C.swex_set_jpl_file(_name)
+	C.free(unsafe.Pointer(_name))
 }
 
 func setTopo(lng, lat, alt float64) {
@@ -92,20 +119,9 @@ func setSidMode(mode swego.Ayanamsa, t0, ayanT0 float64) {
 	C.swex_set_sid_mode(C.int32_t(mode), C.double(t0), C.double(ayanT0))
 }
 
-func setFileNameJPL(name string) {
-	_name := C.CString(name)
-	C.swex_set_jpl_file(_name)
-	C.free(unsafe.Pointer(_name))
-}
-
 func closeEphemeris() {
 	C.swe_close()
 }
-
-const (
-	flgTopo     = C.SEFLG_TOPOCTR
-	flgSidereal = C.SEFLG_SIDEREAL
-)
 
 func planetName(pl swego.Planet) string {
 	var _name [C.AS_MAXCH]C.char
@@ -183,14 +199,6 @@ func nodApsUT(ut float64, pl swego.Planet, fl int32, m swego.NodApsMethod) (nasc
 	return _nodAps(ut, pl, fl, m, func(jd C.double, pl, fl, m C.int32, nasc, ndsc, peri, aphe *C.double, err *C.char) C.int32 {
 		return C.swe_nod_aps_ut(jd, pl, fl, m, nasc, ndsc, peri, aphe, err)
 	})
-}
-
-func getAyanamsa(et float64) float64 {
-	return float64(C.swe_get_ayanamsa(C.double(et)))
-}
-
-func getAyanamsaUT(ut float64) float64 {
-	return float64(C.swe_get_ayanamsa_ut(C.double(ut)))
 }
 
 type _getAyanamsaExFunc func(jd C.double, fl C.int32, aya *C.double, err *C.char) C.int32
@@ -329,14 +337,6 @@ func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_, _ []float64, err 
 	return cusps[:n:n], ascmc[:], err
 }
 
-func houses(ut, lat, lng float64, hsys swego.HSys) ([]float64, []float64, error) {
-	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
-		_jd := C.double(ut)
-		_lng := C.double(lng)
-		return C.swe_houses(_jd, lat, _lng, hsys, cusps, ascmc)
-	})
-}
-
 func housesEx(ut float64, fl int32, lat, lng float64, hsys swego.HSys) ([]float64, []float64, error) {
 	return _houses(lat, hsys, func(lat C.double, hsys C.int, cusps, ascmc *C.double) C.int {
 		_jd := C.double(ut)
@@ -371,10 +371,6 @@ func housePos(armc, geolat, eps float64, hsys swego.HSys, pllng, pllat float64) 
 
 func houseName(hsys swego.HSys) string {
 	return C.GoString(C.swe_house_name(C.int(hsys)))
-}
-
-func deltaT(jd float64) float64 {
-	return float64(C.swe_deltat(C.double(jd)))
 }
 
 func deltaTEx(jd float64, eph int32) (deltaT float64, err error) {

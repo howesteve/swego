@@ -83,3 +83,50 @@ func TestCalcFlags_SetEphemeris(t *testing.T) {
 		t.Error("flags value does not contain ephemeris flag")
 	}
 }
+
+type testInterface struct{ Interface }
+type testExclLocker struct{ Interface }
+type testLockedIface struct{ Interface }
+
+func (l *testLockedIface) ExclusiveUnlock() {}
+func (el *testExclLocker) ExclusiveLock() LockedInterface {
+	return &testLockedIface{el}
+}
+
+func TestLocked(t *testing.T) {
+	t.Run("Interface", func(t *testing.T) {
+		called := make(chan struct{}, 1)
+		swe := new(testInterface)
+		Locked(swe, func(i Interface) {
+			if i != swe {
+				t.Error("passed Interface no equal to input Interface")
+			}
+
+			called <- struct{}{}
+		})
+
+		select {
+		case <-called:
+		default:
+			t.Error("callback not called")
+		}
+	})
+
+	t.Run("ExclusiveLocker", func(t *testing.T) {
+		called := make(chan struct{}, 1)
+		swe := (*testExclLocker)(nil)
+		Locked(swe, func(i Interface) {
+			if i.(*testLockedIface).Interface != swe {
+				t.Error("passed Interface no equal to input Interface")
+			}
+
+			called <- struct{}{}
+		})
+
+		select {
+		case <-called:
+		default:
+			t.Error("callback not called")
+		}
+	})
+}
