@@ -38,11 +38,12 @@ type Library interface {
 }
 
 // Open initializes the Swiss Ephemeris C library with DefaultPath as
-// ephemeris path.
+// ephemeris path. The returned object is safe for concurrent use.
 func Open() Library { return OpenWithPath(DefaultPath) }
 
 // OpenWithPath initializes the Swiss Ephemeris C library and calls
 // swe_set_ephe_path with ephePath as argument afterwards.
+// The returned object is safe for concurrent use.
 func OpenWithPath(ephePath string) Library {
 	swe := Interface()
 	swe.SetPath(ephePath)
@@ -50,7 +51,7 @@ func OpenWithPath(ephePath string) Library {
 }
 
 // Interface returns an object that calls the Swiss Ephemeris C library.
-// It is safe for concurrent use.
+// The returned object is safe for concurrent use.
 func Interface() Library {
 	winit.Do(func() {
 		checkLibrary()
