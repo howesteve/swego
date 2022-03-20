@@ -1,7 +1,3 @@
-/*********************************************************
-  version 21-apr-2021
-*********************************************************/
-
 /* Copyright (C) 1997 - 2021 Astrodienst AG, Switzerland.  All rights reserved.
 
   License conditions
@@ -51,31 +47,6 @@
   the Swiss Ephemeris. This copyright notice is the ONLY place where the
   names of the authors can legally appear, except in cases where they have
   given special permission in writing.
-
-  The trademarks 'Swiss Ephemeris' and 'Swiss Ephemeris inside' may be used
-  for promoting such software, products or services.
 */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-#ifndef _SWEDLL_H
-extern EXP32 int swe_date_conversion (
-	int y , int m , int d ,		/* year, month, day */
-     	double utime, 	/* universal time in hours (decimal) */
-     	char c,  	/* calendar g[regorian]|j[ulian]|a[stro = greg] */
- 	double *tgmt);
-
-extern EXP32 double *swe_julday(
-	int year, int month, int day, double hour, 
-	int gregflag);
-
-extern EXP32 void swe_revjul (
-	double jd, 
-	int gregflag,
-     	int *jyear, int *jmon, int *jday, double *jut);
-#endif
-#ifdef __cplusplus
-} /* extern C */
-#endif

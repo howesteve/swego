@@ -52,7 +52,7 @@ import (
 // ----------
 
 #cgo CFLAGS: -DTLSOFF=1
-#cgo CFLAGS: -g -Wall
+// #cgo CFLAGS: -g -Wall
 #cgo LDFLAGS: -lswe -ldl -lm
 
 #include "swephexp.h"
