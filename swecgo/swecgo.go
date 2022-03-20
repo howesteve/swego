@@ -1,4 +1,10 @@
+//go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
+
+// #cgo LDFLAGS: -lswe -ldl -lm
+// # cgo LDFLAGS: -lswe -ldl -lm
+// #cgo CFLAGS: -g -Wall
+// #cgo pkg-config: m
 
 // Package swecgo embeds the Swiss Ephemeris library using cgo.
 package swecgo
@@ -6,7 +12,7 @@ package swecgo
 import (
 	"sync"
 
-	"github.com/astrotools/swego"
+	"github.com/howesteve/swego"
 )
 
 // Library extends the main library interface by exposing C library

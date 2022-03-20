@@ -1,4 +1,8 @@
-# Swiss Ephemeris library for Go [![GoDoc](https://godoc.org/github.com/astrotools/swego?status.svg)](https://godoc.org/github.com/astrotools/swego)
+# Swiss Ephemeris library for Go [![GoDoc](https://godoc.org/github.com/howesteve/swego?status.svg)](https://godoc.org/github.com/howesteve/swego)
+
+This is a fork from the original work at [https://github.com/astrotools/swego](https://github.com/astrotools/swego)
+
+I have updated swiss ephemeris files, and made it compile with go 1.18.
 
 This repository contains multiple ways to interface with the Swiss Ephemeris.
 - `swecgo` interfaces with the C library via cgo.

@@ -1,3 +1,4 @@
+//go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
 
 package swecgo
@@ -5,7 +6,7 @@ package swecgo
 import (
 	"fmt"
 
-	"github.com/astrotools/swego"
+	"github.com/howesteve/swego"
 )
 
 func Example() {

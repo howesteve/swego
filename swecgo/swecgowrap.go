@@ -1,8 +1,9 @@
+//go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
 
 package swecgo
 
-import "github.com/astrotools/swego"
+import "github.com/howesteve/swego"
 
 // acquire locks the wrapper for exclusive library access.
 // release unlocks the wrapper from exclusive library access.

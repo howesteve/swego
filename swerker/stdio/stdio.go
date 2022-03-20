@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/astrotools/swego/swerker"
-	"github.com/astrotools/swego/swerker/stdio/internal/worker"
+	"github.com/howesteve/swego/swerker"
+	"github.com/howesteve/swego/swerker/stdio/internal/worker"
 
 	"github.com/tinylib/msgp/msgp"
 )

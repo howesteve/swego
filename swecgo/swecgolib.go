@@ -1,15 +1,20 @@
+//go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
+
+// #cgo LDFLAGS: -lswe -ldl -lm
+// #cgo LDFLAGS: -lswe -ldl -lm
+// #cgo CFLAGS: -g -Wall
+// #cgo pkg-config: m
 
 package swecgo
 
 import (
 	"unsafe"
 
-	"github.com/astrotools/swego"
+	"github.com/howesteve/swego"
 )
 
 /*
-
 // To aid debugging the Swiss Ephemeris supports tracing. It will write two
 // files in the current working directory. Note that the Go tool may change the
 // current working directory. The tracing facility has 2 modes:
@@ -42,11 +47,13 @@ import (
 // ----------
 
 // Disable thread local storage in library.
-#cgo CFLAGS: -DTLSOFF=1
+// #cgo CFLAGS: -DTLSOFF=1
 
 // ----------
 
-#cgo CFLAGS: -w
+#cgo CFLAGS: -DTLSOFF=1
+#cgo CFLAGS: -g -Wall
+#cgo LDFLAGS: -lswe -ldl -lm
 
 #include "swephexp.h"
 #include "sweph.h"
@@ -56,7 +63,6 @@ import (
 double swecgo_deltat_automatic() {
 	return SE_DELTAT_AUTOMATIC;
 }
-
 */
 import "C"
 

@@ -1,3 +1,4 @@
+//go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
 
 package swecgo
@@ -9,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/astrotools/swego"
+	"github.com/howesteve/swego"
 )
 
 func TestVersionHeaderFile(t *testing.T) {
@@ -108,49 +109,49 @@ func Test_wrapper_Calc(t *testing.T) {
 			result{[]float64{279.858461, .000229, .983331, .0, .0, .0}, 0}},
 		{swe.CalcUT,
 			nil,
-			result{[]float64{279.859214, .000229, .983331, .0, .0, .0}, 2}},
+			result{[]float64{279.859216, .000229, .983331, .0, .0, .0}, 2}},
 		{swe.Calc,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL},
 			result{[]float64{279.858461, .000229, .983331, .0, .0, .0}, 1}},
 		{swe.CalcUT,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL},
-			result{[]float64{279.859214, .000229, .983331, .0, .0, .0}, 1}},
+			result{[]float64{279.859216, .000229, .983331, .0, .0, .0}, 1}},
 		{swe.Calc,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL, JPLFile: swego.FnameDft2},
 			result{[]float64{279.858461, .000230, .983331, .0, .0, .0}, 1}},
 		{swe.CalcUT,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL, JPLFile: swego.FnameDft2},
-			result{[]float64{279.859214, .000230, .983331, .0, .0, .0}, 1}},
+			result{[]float64{279.859216, .000230, .983331, .0, .0, .0}, 1}},
 		{swe.Calc,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
 				TopoLoc: &swego.GeoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
-			result{[]float64{279.858426, -.000966, .983369, .0, .0, .0}, 32769}},
+			result{[]float64{279.858426, -.000966, .983369, .0, .0, .0}, 32772}},
 		{swe.CalcUT,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagTopo,
 				TopoLoc: &swego.GeoLoc{Lat: 52.083333, Long: 5.116667, Alt: 0},
 			},
-			result{[]float64{279.859186, -.000966, .983369, .0, .0, .0}, 32769}},
+			result{[]float64{279.859186, -.000966, .983369, .0, .0, .0}, 32772}},
 		{swe.Calc,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL | swego.FlagSidereal},
-			result{[]float64{255.121938, .000229, .983331, .0, .0, .0}, 65601}},
+			result{[]float64{255.121938, .000229, .983331, .0, .0, .0}, 65604}},
 		{swe.CalcUT,
 			&swego.CalcFlags{Flags: swego.FlagEphJPL | swego.FlagSidereal},
-			result{[]float64{255.122691, .000229, .983331, .0, .0, .0}, 65601}},
+			result{[]float64{255.12280449619868, 0.0002346766083462040, 0.9833318780303111, .0, .0, .0}, 65604}},
 		{swe.Calc,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
 				SidMode: &swego.SidMode{Mode: 1},
 			},
-			result{[]float64{256.005296, .000229, .983331, .0, .0, .0}, 65601}},
+			result{[]float64{256.005296, .000229, .983331, .0, .0, .0}, 65604}},
 		{swe.CalcUT,
 			&swego.CalcFlags{
 				Flags:   swego.FlagEphJPL | swego.FlagSidereal,
 				SidMode: &swego.SidMode{Mode: 1},
 			},
-			result{[]float64{256.006049, .000229, .983331, .0, .0, .0}, 65601}},
+			result{[]float64{256.0060121369246, 0.00023467660834620405, 0.983331878030311, .0, .0, .0}, 65604}},
 	}
 
 	for _, c := range cases {
@@ -320,8 +321,8 @@ func Test_wrapper_GetAyanamsaEx(t *testing.T) {
 		fn   func(float64, *swego.AyanamsaExFlags) (float64, error)
 		want float64
 	}{
-		{swe.GetAyanamsaEx, 24.740393},
-		{swe.GetAyanamsaExUT, 24.740393},
+		{swe.GetAyanamsaEx, 24.736411},
+		{swe.GetAyanamsaExUT, 24.736411},
 	}
 
 	fl := &swego.AyanamsaExFlags{

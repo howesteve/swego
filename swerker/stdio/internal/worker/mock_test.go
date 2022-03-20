@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/astrotools/swego/swerker/stdio/internal/lichdata"
+	"github.com/howesteve/swego/swerker/stdio/internal/lichdata"
 
 	"github.com/tinylib/msgp/msgp"
 )
