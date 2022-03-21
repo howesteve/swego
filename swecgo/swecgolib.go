@@ -9,6 +9,7 @@
 package swecgo
 
 import (
+	"fmt"
 	"unsafe"
 
 	"github.com/howesteve/swego"
@@ -439,4 +440,17 @@ func sidTime0(ut, eps, nut float64) float64 {
 
 func sidTime(ut float64) float64 {
 	return float64(C.swe_sidtime(C.double(ut)))
+}
+
+// Returns (ideg, imin, isec, dsecfr, isgn)
+func splitDeg(ddeg float64, roundflag int) (int32, int32, int32, float64, int32) {
+	fmt.Printf("\nINPUT: ddeg: %f, roundflag: %d", ddeg, roundflag)
+	var ideg C.int32
+	var imin C.int32
+	var isec C.int32
+	var dsecfr C.double
+	var isgn C.int32
+	C.swe_split_deg(C.double(ddeg), C.int32(roundflag), &ideg, &imin, &isec, &dsecfr, &isgn)
+	fmt.Printf("\nRESULTS: %v %v %v %v %v", ideg, imin, isec, dsecfr, isgn)
+	return int32(ideg), int32(imin), int32(isec), float64(dsecfr), int32(isgn)
 }

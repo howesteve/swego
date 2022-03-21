@@ -231,6 +231,11 @@ type Interface interface {
 	// SidTime returns the sidereal time for Julian Date jd at the Greenwich
 	// medidian, measured in hours.
 	SidTime(ut float64, fl *SidTimeFlags) (float64, error)
+
+	// SplitDeg takes a decimal degree number as input and provides sign or
+	// nakshatra, degree, minutes, seconds and fraction of second.
+	// Internally it calls swe_split_deg() and it's reference should be used.
+	SplitDeg(ddeg float64, roundflag int) (ideg int32, imin int32, isec int32, dsecfr float64, isgn int32)
 }
 
 // Locked tries to exclusively lock the library handle, disable per function

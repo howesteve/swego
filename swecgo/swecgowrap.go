@@ -3,7 +3,9 @@
 
 package swecgo
 
-import "github.com/howesteve/swego"
+import (
+	"github.com/howesteve/swego"
+)
 
 // acquire locks the wrapper for exclusive library access.
 // release unlocks the wrapper from exclusive library access.
@@ -276,4 +278,8 @@ func (w *wrapper) SidTime(ut float64, fl *swego.SidTimeFlags) (float64, error) {
 	f := sidTime(ut)
 	w.release()
 	return f, nil
+}
+
+func (w *wrapper) SplitDeg(ddeg float64, roundflag int) (ideg int32, imin int32, isec int32, dsecfr float64, isgn int32) {
+	return splitDeg(ddeg, roundflag)
 }

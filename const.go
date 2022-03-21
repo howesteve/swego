@@ -203,3 +203,15 @@ const (
 	AxialRotation        HSys = 'X' // a.k.a. Meridian
 	APCHouses            HSys = 'Y'
 )
+
+// SplitDeg() flags.
+// See documentation on swe_split_deg() for more details
+const (
+	SplitDegRoundSec  = 1
+	SplitDegRoundMin  = 2
+	SplitDegRoundDeg  = 4
+	SplitDegZodiacal  = 8    // split into zodiac signs
+	SplitDegNakshatra = 1024 // split into nakshatras
+	SplitDegKeepSign  = 16   // don't round to next zodiac sign/nakshatra
+	SplitDegKeepDeg   = 32   // don't round to next degree
+)
