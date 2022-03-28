@@ -71,11 +71,10 @@ func setCalcFlagsState(fl *swego.CalcFlags) int32 {
 
 		setSidMode(mode, t0, ayanT0)
 	}
-
-	if fl.JPLFile == "" {
-		fl.JPLFile = swego.FnameDft
+	if (fl.Flags&swego.FlagEphJPL) > 0 && fl.JPLFile != "" {
+		setJPLFile(fl.JPLFile)
 	}
-	setJPLFile(fl.JPLFile)
+
 	setDeltaT(fl.DeltaT)
 	return fl.Flags
 }
