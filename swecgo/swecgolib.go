@@ -1,8 +1,8 @@
 //go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
 
-// #cgo LDFLAGS: -lswe -ldl -lm
-// #cgo LDFLAGS: -lswe -ldl -lm
+// # cgo LDFLAGS: -lswe -ldl -lm
+// #cgo LDFLAGS: -ldl -lm
 // #cgo CFLAGS: -g -Wall
 // #cgo pkg-config: m
 
@@ -52,8 +52,8 @@ import (
 // ----------
 
 #cgo CFLAGS: -DTLSOFF=1
-// #cgo CFLAGS: -g -Wall
-#cgo LDFLAGS: -lswe -ldl -lm
+#cgo CFLAGS: -g -Wall
+#cgo LDFLAGS:-ldl -lm
 
 #include "swephexp.h"
 #include "sweph.h"
@@ -328,7 +328,7 @@ func _houses(lat float64, hsys swego.HSys, fn _housesFunc) (_, _ []float64, err 
 	_ascmc := (*C.double)(unsafe.Pointer(&ascmc[0]))
 
 	if C.ERR == fn(_lat, _hsys, _cusps, _ascmc) {
-		err = swego.Error("")
+		err = swego.Error("swe_house() error")
 	}
 
 	// The house system letters are practically constants. If those are changed,

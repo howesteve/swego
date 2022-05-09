@@ -1,8 +1,8 @@
+// go:build (linux && cgo) || (darwin && cgo)
 //go:build (linux && cgo) || (darwin && cgo)
 // +build linux,cgo darwin,cgo
 
-// #cgo LDFLAGS: -lswe -ldl -lm
-// # cgo LDFLAGS: -lswe -ldl -lm
+// #cgo LDFLAGS: -ldl -lm
 // #cgo CFLAGS: -g -Wall
 // #cgo pkg-config: m
 
